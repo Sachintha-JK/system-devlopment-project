@@ -10,7 +10,7 @@ function Supply() {
       <div style={{ marginLeft: '50px', padding: '20px', width: 'fit-content' }}>
         <h1>Supply</h1>
       </div>
-      
+      //hi
            
     </div>
   );
