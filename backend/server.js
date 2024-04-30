@@ -14,6 +14,8 @@ password:"",
 database:"spicemart"
 })
 
+
+//login
 app.post('/login',(req,res)=>{
     const sql="SELECT * FROM user WHERE User_Name=? and Password=? ";
     
@@ -28,6 +30,52 @@ app.post('/login',(req,res)=>{
     } )   
         
 })
+
+
+//Change Password
+app.post('/change-password', (req, res) => {
+  const { username, currentPassword, newPassword } = req.body;
+  const sqlCheck = "SELECT * FROM user WHERE User_Name=?";
+
+  db.query(sqlCheck, [username], (err, data) => {
+    if (err) return res.json("Error");
+    if (data.length > 0) {
+      if (data[0].Password === currentPassword) {
+        const sqlUpdate = "UPDATE user SET Password=? WHERE User_Name=?";
+
+        db.query(sqlUpdate, [newPassword, username], (err, result) => {
+          if (err) return res.json("Error");
+          if (result.affectedRows > 0) {
+            return res.json({ status: "success" });
+          } else {
+            return res.json({ status: "no record" });
+          }
+        });
+      } else {
+        return res.json({ status: "incorrect current password" });
+      }
+    } else {
+      return res.json({ status: "no record" });
+    }
+  });
+});
+  
+
+//Supplier- Price Level
+app.get('/spices', (req, res) => {
+  const sql = 'SELECT * FROM spice';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      res.status(500).json({ error: 'Error retrieving spices' });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
+
+
 
 app.listen(8081,()=>{
     console.log ("listening...")

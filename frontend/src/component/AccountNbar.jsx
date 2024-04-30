@@ -10,6 +10,7 @@ function AccountNbar() {
           <Nav className="me-auto">
             <Nav.Link href="login">Profile</Nav.Link>
             <Nav.Link href="signup">Settings</Nav.Link>
+            <Nav.Link href="cpassword">Change Password</Nav.Link>
            
           </Nav>
         </Container>

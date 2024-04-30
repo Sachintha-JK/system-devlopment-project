@@ -23,7 +23,7 @@ function SupHome() {
                   <Card.Text>
                   Easily schedule appointments for delivering your goods to the relevant branch.
                   </Card.Text>
-                  <Button onClick ={()=> Navigate("/availability")} variant="primary">View Details</Button>
+                  <Button onClick ={()=> Navigate("/appointment")} variant="primary">View Details</Button>
                 </Card.Body>
               </Card>
             </Col>

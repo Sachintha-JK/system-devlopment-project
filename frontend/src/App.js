@@ -17,6 +17,7 @@ import AppointmentReview from './page/BranchManager/AppointmentReview';
 import Delivery from './page/BranchManager/Delivery';
 import Supply from './page/BranchManager/Supply';
 import SpaymentReview from './page/BranchManager/SpaymentReview';
+import Cpassword from './page/ANavBar/Cpassword';
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
 <Routes>
 <Route path='/' element={<Home/>}></Route>
 <Route path='/login' element={<Login/>}></Route>
+<Route path='/cpassword' element={<Cpassword/>}></Route>
 <Route path='/signup' element={<Signup/>}></Route>
 <Route path='/suphome' element={<SupHome/>}></Route>
 <Route path='/appointment' element={<Appointment/>}></Route>
