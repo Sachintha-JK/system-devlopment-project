@@ -19,7 +19,7 @@ database:"spicemart"
 app.post('/login',(req,res)=>{
     const sql="SELECT * FROM user WHERE User_Name=? and Password=? ";
     
-    db.query(sql,[req.body.User_Name, req.body.Password],(err,data)=>{
+    db.query(sql,[req.body.User_Name, req.body.Password],(err,data)=>{ 
         if(err)return res.json("Error");
         if(data.length>0){
             console.log(data[0].User_Type);

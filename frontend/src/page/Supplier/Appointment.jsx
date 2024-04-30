@@ -31,6 +31,13 @@ function Appointment() {
       <div style={{ marginLeft: '60px', border: '1px solid black', padding: '20px', width: 'fit-content' }}>
         <Form>
           <Form.Group className="mb-3" controlId="formBasicType">
+
+
+          <Form.Group className="mb-3" controlId="formBasicDate">
+            <Form.Label>Customer ID</Form.Label>
+            <Form.Control type="Date" placeholder="Select the Date" />
+          </Form.Group>
+
             <Form.Label>Spice Type</Form.Label>
             <Form.Select aria-label="Default select example" >
               <option>Open this select menu</option>

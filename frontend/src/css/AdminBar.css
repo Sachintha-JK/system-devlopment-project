@@ -1,0 +1,22 @@
+.vertical-navbar {
+  width: 100%;
+  max-width: 150px; /* Decrease the size of the navigation bar */
+  position: fixed; /* Fixed position to stay on scroll */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  padding: 1rem 0;
+  background-color: #007bff; /* Add a blue background color */
+}
+
+.vertical-navbar .nav-link {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem; /* Decrease the font size */
+  color: white; /* Change the text color to white for better contrast */
+}
+
+.vertical-navbar .nav-link:hover,
+.vertical-navbar .nav-link:focus {
+  background-color: #0069d9; /* Darken the background color on hover */
+  color: white; /* Keep the text color white on hover */
+}

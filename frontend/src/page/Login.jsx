@@ -24,6 +24,8 @@ function Login() {
           navigate('/cusHome');
         } else if (res.data.userType === 'Branch Manager') {
           navigate('/bmanagerhome');
+         } else if (res.data.userType === 'Admin') {
+            navigate('/adminhome');
         }
       } else {
         setError(res.data.status);
