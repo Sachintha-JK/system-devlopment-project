@@ -1,6 +1,14 @@
 import React from 'react';
 import Card from 'react-bootstrap/Card';
 import Accordion from 'react-bootstrap/Accordion';
+import image1 from '../assets/image1.jpg';
+import image2 from '../assets/image2.jpg'
+import image3 from '../assets/image3.jpg'
+import image4 from '../assets/image4.jpg'
+import image5 from '../assets/image5.jpg'
+import image6 from '../assets/image6.jpg'
+import image7 from '../assets/image7.jpg'
+import image8 from '../assets/image8.jpg'
 
 function Desc() {
   return (
@@ -33,22 +41,30 @@ function Desc() {
             <Accordion.Item eventKey="0">
               <Accordion.Header>If you are a supplier,</Accordion.Header>
               <Accordion.Body style={{ textAlign: 'justify' }}>
-                <ul>
-              <li>Easily schedule appointments with relevant branches.</li>
-              <li>Access real-time spice price levels at the Spice Shop</li>
-              <li>View your payment history for the past three months and check the payment status</li>
-              <li>Specify whether you are a monthly or cash-based supplier</li>
+                <ul style={{listStyleType:'none'}}>
+              <li><img src={image1} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                Easily schedule appointments with relevant branches.</li>
+              <li><img src={image2} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                Access real-time spice price levels at the Spice Shop</li>
+              <li><img src={image3} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                View payment history in past three months,the payment status</li>
+              <li><img src={image4} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                Specify whether you are a monthly or cash-based supplier</li>
               </ul>
               </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="1">
               <Accordion.Header>If you are a customer,</Accordion.Header>
               <Accordion.Body style={{ textAlign: 'justify' }}>
-                <ul>
-              <li>View the availability of spices along with their prices in real-time.</li>
-              <li>Easily place orders and pre-orders through the system.</li>
-              <li>Access to their payment history, allowing them to track your transactions and ensure accuracy in billing.</li>
-              <li>Receive notifications about updates on your order status and payments.</li>
+              <ul style={{listStyleType:'none'}}>
+              <li><img src={image5} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                View the availability of spices along with prices in real-time.</li>
+              <li><img src={image6} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                Easily place orders and pre-orders through the system.</li>
+              <li><img src={image7} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                Access to their payment history and ensure accuracy in billing.</li>
+              <li><img src={image8} alt="Image 1" style={{ width: '100px', height: '100px' }}/>
+                Receive notifications about updates on order status ,payments.</li>
               </ul>
               </Accordion.Body>
             </Accordion.Item>

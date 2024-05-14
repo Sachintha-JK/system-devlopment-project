@@ -1,0 +1,25 @@
+.sup-register-form-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: left;
+  }
+  
+  .sup-register-form {
+    height: auto;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: left;
+    border: 1px solid #0c0c0c; /* Add a 1px solid gray border */
+  border-radius: 5px; /* Add a 5px border radius */
+  padding: 20px; /* Add some padding to the form */
+  }
+  
+  @media (max-width: 768px) {
+    .sup-register-form {
+      width: 80%;
+    }
+  }
+  

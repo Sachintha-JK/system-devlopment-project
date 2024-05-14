@@ -9,12 +9,20 @@ export default function Signup() {
       <div className='logsignup-container' style={{backgroundImage: `url(${backgroundImage})`}}>
       <div className='logsignup-form'>
         
+      
       <form>
-          <h1>SignUp</h1>
-          <div className='logsignup-input'>
-        <label htmlFor='usertype'>User Type</label>
-        <input type='text' placeholder='Enter User type' className='form-control rounded-1' />
-        </div>
+  <h1>SignUp</h1>
+  <div className='logsignup-input'>
+    <label htmlFor='usertype'>User Type</label>
+    <select className='form-control rounded-1'>
+      <option value='Admin'>Admin</option>
+      <option value='Branch Manager'>Branch Manager</option>
+      <option value='Supplier'>Supplier</option>
+      <option value='Customer'>Customer</option>
+    </select>
+  </div>
+
+
 
         <div className='logsignup-input'>
         <label htmlFor='username'>Username</label>

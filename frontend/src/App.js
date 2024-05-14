@@ -19,7 +19,6 @@ import Supply from './page/BranchManager/Supply';
 import SpaymentReview from './page/BranchManager/SpaymentReview';
 import Cpassword from './page/ANavBar/Cpassword';
 import AdminHome from './page/Admin/AdminHome';
-import Register from './page/Admin/Register';
 import SupRegister from './page/Admin/SupRegister';
 import CusRegister from './page/Admin/CusRegister';
 import ManagerRegister from './page/Admin/ManagerRegister';
@@ -48,7 +47,6 @@ function App() {
 <Route path='/spaymentreview' element={<SpaymentReview/>}></Route>
 <Route path='/supply' element={<Supply/>}></Route>
 <Route path='/adminhome' element={<AdminHome/>}></Route>
-<Route path='/register' element={<Register/>}></Route>
 <Route path='/SupRegister' element={<SupRegister/>}></Route>
 <Route path='/CusRegister' element={<CusRegister/>}></Route>
 <Route path='/ManagerRegister' element={<ManagerRegister/>}></Route>

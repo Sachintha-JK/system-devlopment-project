@@ -12,16 +12,16 @@ function AdminHome() {
           <Nav className="flex-column">
             <Nav.Link href="#adminhome">Home</Nav.Link>
             <NavDropdown title="Register" id="features-dropdown">
-              <NavDropdown.Item href="#SupRegister">Supplier</NavDropdown.Item>
-              <NavDropdown.Item href="#CusRegister">Customer</NavDropdown.Item>
-              <NavDropdown.Item href="#ManagerRegister">Branch Manager</NavDropdown.Item>
+              <NavDropdown.Item href="/SupRegister">Supplier</NavDropdown.Item>
+              <NavDropdown.Item href="/CusRegister">Customer</NavDropdown.Item>
+              <NavDropdown.Item href="/ManagerRegister">Branch Manager</NavDropdown.Item>
               {/* Add more features as needed */}
             </NavDropdown>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
+            <Nav.Link href="#pricing">Supplier Payments</Nav.Link>
+            <Nav.Link href="#pricing">Customer Payments</Nav.Link>
+            <Nav.Link href="#pricing">Orders</Nav.Link>
+            <Nav.Link href="#pricing">Availability</Nav.Link>
+           
           </Nav>
         </Container>
       </Navbar>
