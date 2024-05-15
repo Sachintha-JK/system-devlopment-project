@@ -50,28 +50,48 @@ app.get('/customer/:userId', (req, res) => {
     return res.json({ customerId: data[0].Customer_ID });
   });
 });
-//------------------------------------------------------------------------------------
 
+//------------------------------------------
 app.get('/customer_order/:customerId', (req, res) => {
   const customerId = req.params.customerId;
-  console.log('Fetching orders for customer ID:', customerId);
+  const sql = `SELECT o.Order_ID, o.Order_Date, o.payment,
+  GROUP_CONCAT(CONCAT(s.Spice_Name, ' - ', os.Quantity, '  - ', os.Value, ' ')) AS Spices,
+  SUM(os.Quantity * os.Value) AS Total_Value
+FROM customer_order o
+JOIN order_spice os ON os.Order_ID = o.Order_ID
+JOIN spice s ON os.Spice_ID = s.Spice_ID
+WHERE o.Customer_ID = ?
+GROUP BY o.Order_ID, o.Order_Date, o.payment
+`;
 
-  const sql = 'SELECT * FROM customer_order WHERE Customer_ID = ?';
   db.query(sql, [customerId], (err, data) => {
     if (err) {
-      console.error('Error executing query:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Database query error:', err);  // Log error for debugging
+      return res.status(500).json({ error: "Internal Server Error" });
     }
     if (data.length === 0) {
-      console.warn('No orders found for customer ID:', customerId);
-    } else {
-      console.log('Query result:', data);
+      console.log('No orders found for customer ID:', customerId);  // Log no data found
+      return res.status(404).json({ error: "Orders not found" });
     }
-    res.json({ orders: data });
+    console.log('Query result:', data);  // Log the data for debugging
+    console.log(data)
+    return res.json({ orders: data });
   });
 });
-//------------------------------------------
 
+//************spices dropdown
+
+app.get('/spice', (req, res) => {
+  const sql = 'SELECT Spice_Id, Spice_Name FROM spice';
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error fetching Spices', err);
+      res.status(500).json({ error: 'Failed to fetch Spices' });
+    } else {
+      res.json(result);
+    }
+  });
+});
 
 
 
