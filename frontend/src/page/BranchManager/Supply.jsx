@@ -83,6 +83,16 @@ function Supply() {
     }
   };
 
+  const handleDeleteClick = async (index, supplyId) => {
+    try {
+      await axios.delete(`http://localhost:8081/delete_supply/${supplyId}`);
+      const updatedSupplyDetails = supplyDetails.filter((_, i) => i !== index);
+      setSupplyDetails(updatedSupplyDetails);
+    } catch (error) {
+      console.error('Error deleting supply:', error);
+    }
+  };
+
   return (
     <Container className="mt-5">
       <h1>Supply Details</h1>
@@ -125,6 +135,12 @@ function Supply() {
                   disabled={!detail.disabled}
                 >
                   Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => handleDeleteClick(index, detail.Supply_ID)}
+                >
+                  Delete
                 </Button>
               </td>
             </tr>
