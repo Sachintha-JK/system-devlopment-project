@@ -1,3 +1,5 @@
+// ViewSupplier.js
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Container, Button, Modal, Form, Row, Col } from 'react-bootstrap';
@@ -32,6 +34,7 @@ function ViewSupplier() {
         setSuppliers(suppliersResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
+        // You may want to handle errors more gracefully, maybe display a message to the user
       }
     };
     fetchBranchManagerAndSuppliers();
@@ -47,33 +50,35 @@ function ViewSupplier() {
   };
 
   const handleEditSave = (updatedSupplier) => {
-    setSuppliers(suppliers.map((supplier) =>
-      supplier.Supplier_ID === updatedSupplier.Supplier_ID ? updatedSupplier : supplier
+    setSuppliers(suppliers.map((s) =>
+      s.Supplier_ID === updatedSupplier.Supplier_ID ? updatedSupplier : s
     ));
   };
 
-  const handleDelete = (supplier) => {
+  const handleDeactivate = async (supplier) => {
+    try {
+      await axios.put(`http://localhost:8081/deactivate_supplier/${supplier.Supplier_ID}`);
+      const updatedSuppliers = suppliers.filter((s) => s.Supplier_ID !== supplier.Supplier_ID);
+      setSuppliers(updatedSuppliers);
+    } catch (error) {
+      console.error('Error deactivating supplier:', error);
+      // You may want to handle errors more gracefully, maybe display a message to the user
+    }
+  };
+  
+
+  const confirmDeactivate = (supplier) => {
     setSupplierToDelete(supplier);
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = async () => {
-    try {
-      await axios.delete(`http://localhost:8081/suppliers/${supplierToDelete.Supplier_ID}`);
-      setSuppliers(suppliers.filter((supplier) => supplier.Supplier_ID !== supplierToDelete.Supplier_ID));
-      setShowDeleteModal(false);
-    } catch (error) {
-      console.error('Error deleting supplier:', error);
-    }
-  };
-
-  const cancelDelete = () => {
+  const cancelDeactivate = () => {
     setShowDeleteModal(false);
     setSupplierToDelete(null);
   };
 
-  const filteredSuppliers = suppliers.filter((supplier) =>
-    supplier.Name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSuppliers = suppliers.filter((s) =>
+    s.Name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -114,7 +119,7 @@ function ViewSupplier() {
                 <td>{`${supplier.Address1}, ${supplier.Address2}`}</td>
                 <td>
                   <Button variant="warning" onClick={() => handleEdit(supplier)}>Edit</Button>{' '}
-                  <Button variant="danger" onClick={() => handleDelete(supplier)}>Delete</Button>
+                  <Button variant="danger" onClick={() => confirmDeactivate(supplier)}>Deactivate</Button>
                 </td>
               </tr>
             ))}
@@ -137,14 +142,17 @@ function ViewSupplier() {
           onSave={handleEditSave}
         />
       )}
-      <Modal show={showDeleteModal} onHide={cancelDelete}>
+      <Modal show={showDeleteModal} onHide={cancelDeactivate}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
+          <Modal.Title>Confirm Deactivation</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this supplier?</Modal.Body>
+        <Modal.Body>Are you sure you want to deactivate this supplier?</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={cancelDelete}>Cancel</Button>
-          <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+          <Button variant="secondary" onClick={cancelDeactivate}>Cancel</Button>
+          <Button variant="danger" onClick={() => {
+            handleDeactivate(supplierToDelete);
+            cancelDeactivate(); // Closing modal after deactivation
+          }}>Deactivate</Button>
         </Modal.Footer>
       </Modal>
     </div>

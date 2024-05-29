@@ -14,7 +14,6 @@ import Cpayments from './page/Customer/Cpayments';
 import BmanagerHome from './page/BranchManager/BmanagerHome';
 import AppointmentReview from './page/BranchManager/AppointmentReview';
 import Supply from './page/BranchManager/Supply';
-import SpaymentReview from './page/BranchManager/SpaymentReview';
 import Cpassword from './page/ANavBar/Cpassword';
 import AdminHome from './page/Admin/AdminHome';
 import SupRegister from './page/BranchManager/SupRegister';
@@ -40,7 +39,6 @@ function App() {
 <Route path='/orders' element={<Orders/>}></Route>
 <Route path='/bmanagerhome' element={<BmanagerHome/>}></Route>
 <Route path='/appointmentreview' element={<AppointmentReview/>}></Route>
-<Route path='/spaymentreview' element={<SpaymentReview/>}></Route>
 <Route path='/supply' element={<Supply/>}></Route>
 <Route path='/adminhome' element={<AdminHome/>}></Route>
 <Route path='/SupRegister' element={<SupRegister/>}></Route>

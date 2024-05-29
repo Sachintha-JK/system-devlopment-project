@@ -11,13 +11,7 @@ const ChangePassword = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        'http://localhost:8081/change-password',
-        {
-          username,
-          currentPassword,
-          newPassword,
-        }
+      const response = await axios.post('http://localhost:8081/change-password',{username,currentPassword,newPassword,}
       );
 
       setStatus(response.data.status);

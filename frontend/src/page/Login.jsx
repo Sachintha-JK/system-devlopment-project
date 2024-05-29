@@ -13,7 +13,7 @@ function Login() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    axios.post('http://localhost:8081/login', { User_Name, Password })
+    axios.post('http://localhost:8081/auth/login', { User_Name, Password })
       .then(res => {
         console.log(res.data);
         console.log(res.data.user.User_Type);

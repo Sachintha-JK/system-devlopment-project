@@ -2,21 +2,25 @@ import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql';
 import moment from 'moment';
+import authRoute from './routes/authRoute.js'
+import db from './config/db.js'
 
 const app= express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/auth', authRoute);
+/*const db= mysql.createConnection({
 
-const db= mysql.createConnection({
 host:"localhost",
 user:"root",
 password:"",
 database:"spicemart"
-})
+})*/
 
 //--------------------------------------------------------------------------------------------------
 //login
+
 app.post('/login',(req,res)=>{
     const sql="SELECT * FROM user WHERE User_Name=? and Password=? ";
     
@@ -58,8 +62,8 @@ app.get('/supplier/:userId', (req, res) => {
   
   db.query(sql, [userId], (err, data) => {
     if (err) return res.status(500).json({ error: "Internal Server Error" });
-    if (data.length === 0) return res.status(404).json({ error: "Customer not found" });
-    return res.json({ customerId: data[0].Customer_ID });
+    if (data.length === 0) return res.status(404).json({ error: "Supplier not found" });
+    return res.json({ supplierId: data[0].Supplier_ID });
   });
 });
  
@@ -71,7 +75,7 @@ app.get('/branch_manager/:userId', async (req, res) => {
   db.query(sql, [userId], (err, data) => {
     if (err) return res.status(500).json({ error: "Internal Server Error" });
     if (data.length === 0) return res.status(404).json({ error: "Customer not found" });
-    return res.json({ customerId: data[0].Customer_ID });
+    return res.json({ managerId: data[0].Manager_ID });
   });
 });
 
@@ -81,6 +85,7 @@ app.get('/branch_manager/:userId', async (req, res) => {
 //************spices dropdown
 
 app.get('/spice', (req, res) => {
+
   const sql = 'SELECT Spice_Id, Spice_Name FROM spice';
   db.query(sql, (err, result) => {
     if (err) {
@@ -314,7 +319,8 @@ app.get('/find_branch_manager/:userId', (req, res) => {
 // ------view supplier(branch manager)
 app.get('/suppliers/:branchId', (req, res) => {
   const branchId = req.params.branchId;
-  const sql = "SELECT * FROM supplier WHERE Branch_ID = ?";
+  const sql = "SELECT * FROM supplier WHERE Branch_ID = ? AND Active_Status = 1";
+ 
 
   db.query(sql, [branchId], (err, result) => {
     if (err) {
@@ -387,7 +393,7 @@ app.post('/suppliers', (req, res) => {
     });
   });
 });
- //****************** */
+ //**************Update Supplier**** */
 
  app.put('/suppliers/:id', (req, res) => {
   const supplierId = req.params.id;
@@ -426,54 +432,23 @@ app.post('/suppliers', (req, res) => {
   });
 });
 
-//*****************************delete supplier */
-// DELETE endpoint to delete a supplier by ID
-app.delete('/suppliers/:id', (req, res) => {
+//*****************************deactivate supplier */
+
+app.put('/deactivate_supplier/:id', (req, res) => {
   const supplierId = req.params.id;
 
-  // Start a transaction to ensure atomicity
-  db.beginTransaction((err) => {
+  // Update Active_Status to 0 for the supplier
+  const updateQuery = 'UPDATE supplier SET Active_Status = 0 WHERE Supplier_ID = ?';
+  db.query(updateQuery, [supplierId], (err, result) => {
     if (err) {
-      console.error('Error starting transaction:', err);
+      console.error('Error deactivating supplier:', err);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
 
-    // Delete supplier from the supplier table
-    const deleteSupplierQuery = 'DELETE FROM supplier WHERE Supplier_ID = ?';
-    db.query(deleteSupplierQuery, [supplierId], (err, supplierResult) => {
-      if (err) {
-        return db.rollback(() => {
-          console.error('Error deleting supplier from database:', err);
-          res.status(500).json({ error: 'Internal Server Error' });
-        });
-      }
-
-      // Delete user from the user table
-      const deleteUserQuery = 'DELETE FROM user WHERE User_ID = (SELECT User_ID FROM supplier WHERE Supplier_ID = ?)';
-      db.query(deleteUserQuery, [supplierId], (err, userResult) => {
-        if (err) {
-          return db.rollback(() => {
-            console.error('Error deleting user from database:', err);
-            res.status(500).json({ error: 'Internal Server Error' });
-          });
-        }
-
-        // Commit the transaction if both deletions are successful
-        db.commit((err) => {
-          if (err) {
-            return db.rollback(() => {
-              console.error('Error committing transaction:', err);
-              res.status(500).json({ error: 'Internal Server Error' });
-            });
-          }
-
-          // Return success response if deletion is successful
-          res.status(200).json({ message: 'Supplier and associated user deleted successfully' });
-        });
-      });
-    });
+    res.status(200).json({ message: 'Supplier deactivated successfully' });
   });
 });
+
 //*********get supply details(branch manager)********************* */
 
 app.get('/supply_details/:branchId', (req, res) => {
@@ -503,7 +478,7 @@ WHERE
   });
 });
 
-//**************************************** */
+//********************Update Payment sttus of supplier******************** */
 app.put('/update_payment_status/:supplyId', (req, res) => {
   const supplyId = parseInt(req.params.supplyId);
   const { Payment_Status } = req.body;
@@ -523,7 +498,7 @@ app.put('/update_payment_status/:supplyId', (req, res) => {
     res.json({ success: true, message: 'Payment status updated successfully' });
   });
 });
- //************************************ */ 
+ //*************reset supplier payment*********************** */ 
 
  app.put('/reset_payment_status/:supplyId', (req, res) => {
   const supplyId = parseInt(req.params.supplyId);
@@ -545,19 +520,94 @@ app.put('/update_payment_status/:supplyId', (req, res) => {
 });
 
 //************************************ */
-// Express route to delete a supply record
+// Assuming you're using Express.js
 app.delete('/delete_supply/:supplyId', (req, res) => {
   const supplyId = req.params.supplyId;
-  const sql = `DELETE FROM supply WHERE Supply_ID = ?`;
-
-  db.query(sql, [supplyId], (err, result) => {
-    if (err) {
-      console.error("Error deleting supply:", err);
+  
+  // Start a transaction to ensure atomicity
+  db.beginTransaction(function(err) {
+    if (err) { 
+      console.error("Error starting transaction:", err);
       return res.status(500).json({ error: "Internal Server Error", details: err });
     }
-    return res.json({ message: "Supply deleted successfully" });
+
+    // Delete related records from other tables (if necessary)
+    const deleteRelatedQuery = `DELETE FROM supply_item WHERE Supply_ID = ?`;
+    db.query(deleteRelatedQuery, [supplyId], function(err, result) {
+      if (err) { 
+        db.rollback(function() {
+          console.error("Error deleting related records:", err);
+          return res.status(500).json({ error: "Internal Server Error", details: err });
+        });
+      }
+
+      // Delete record from supply table
+      const deleteQuery = `DELETE FROM supply WHERE Supply_ID = ?`;
+      db.query(deleteQuery, [supplyId], function(err, result) {
+        if (err) { 
+          db.rollback(function() {
+            console.error("Error deleting supply:", err);
+            return res.status(500).json({ error: "Internal Server Error", details: err });
+          });
+        }
+
+        // Commit the transaction
+        db.commit(function(err) {
+          if (err) { 
+            db.rollback(function() {
+              console.error("Error committing transaction:", err);
+              return res.status(500).json({ error: "Internal Server Error", details: err });
+            });
+          }
+          
+          // Transaction successfully committed
+          return res.json({ message: "Supply and related records deleted successfully" });
+        });
+      });
+    });
   });
 });
+
+//---------------Payment-supplier view
+
+app.get('/supply/:supplierId', (req, res) => {
+  const supplierId = req.params.supplierId;
+  const sql = `
+    SELECT s.Supply_ID, s.Date, s.Payment, s.Payment_Status,
+      GROUP_CONCAT(CONCAT(ss.Spice_Name, ' - ', si.Quantity, ' - ', si.Value)) AS Spices,
+      SUM(si.Quantity * si.Value) AS Total_Value
+    FROM supply s
+    JOIN supply_item si ON si.Supply_ID = s.Supply_ID
+    JOIN spice ss ON ss.Spice_ID = si.Spice_ID
+    WHERE s.Supplier_ID = ?
+    GROUP BY s.Supply_ID, s.Date, s.Payment, s.Payment_Status
+  `;
+
+  db.query(sql, [supplierId], (err, data) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (data.length === 0) {
+      console.log('No supplies found for supplier ID:', supplierId);
+      return res.status(404).json({ error: "Supplies not found" });
+    }
+    console.log('Query result:', data);
+    return res.json({ supplies: data });
+  });
+});
+//************************************ */
+//-----------------------Appointments
+app.get('/appointment/:supplierId', (req, res) => {
+  const supplierId = req.params.supplierId;
+  const sql = "SELECT * FROM appointment WHERE Supplier_ID = ?";
+  
+  db.query(sql, [supplierId], (err, data) => {
+    if (err) return res.status(500).json({ error: "Internal Server Error" });
+    return res.json({ appointments: data });
+  });
+});
+
 
 
 //-------------------------------------------------------------------------------------------------------
