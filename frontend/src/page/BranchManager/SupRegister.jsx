@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Container, Button, Modal } from 'react-bootstrap';
+import { Table, Container, Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import AddSupplier from '../../component/AddSupplier'; // Adjust the import path as needed
 import EditSupplier from '../../component/EditSupplier'; // Import the EditSupplier component
 
@@ -12,6 +12,7 @@ function ViewSupplier() {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [supplierToDelete, setSupplierToDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchBranchManagerAndSuppliers = async () => {
@@ -71,10 +72,26 @@ function ViewSupplier() {
     setSupplierToDelete(null);
   };
 
+  const filteredSuppliers = suppliers.filter((supplier) =>
+    supplier.Name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
       <Container className="mt-5">
-        <h1>Registered Suppliers</h1>
+        <Row>
+          <Col>
+            <h1>Registered Suppliers</h1>
+          </Col>
+          <Col>
+            <Form.Control
+              type="text"
+              placeholder="Search by supplier name"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </Col>
+        </Row>
         <Button variant="primary" onClick={() => setShowAddModal(true)}>Add Supplier</Button>
         <br />
         <br />
@@ -89,7 +106,7 @@ function ViewSupplier() {
             </tr>
           </thead>
           <tbody>
-            {suppliers.map((supplier) => (
+            {filteredSuppliers.map((supplier) => (
               <tr key={supplier.Supplier_ID}>
                 <td>{supplier.Supplier_ID}</td>
                 <td>{supplier.Name}</td>

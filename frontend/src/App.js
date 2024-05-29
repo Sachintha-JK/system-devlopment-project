@@ -13,7 +13,6 @@ import Orders from './page/Customer/Orders';
 import Cpayments from './page/Customer/Cpayments';
 import BmanagerHome from './page/BranchManager/BmanagerHome';
 import AppointmentReview from './page/BranchManager/AppointmentReview';
-import Delivery from './page/BranchManager/Delivery';
 import Supply from './page/BranchManager/Supply';
 import SpaymentReview from './page/BranchManager/SpaymentReview';
 import Cpassword from './page/ANavBar/Cpassword';
@@ -41,7 +40,6 @@ function App() {
 <Route path='/orders' element={<Orders/>}></Route>
 <Route path='/bmanagerhome' element={<BmanagerHome/>}></Route>
 <Route path='/appointmentreview' element={<AppointmentReview/>}></Route>
-<Route path='/delivery' element={<Delivery/>}></Route>
 <Route path='/spaymentreview' element={<SpaymentReview/>}></Route>
 <Route path='/supply' element={<Supply/>}></Route>
 <Route path='/adminhome' element={<AdminHome/>}></Route>
