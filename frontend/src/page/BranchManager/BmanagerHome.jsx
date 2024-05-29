@@ -1,69 +1,24 @@
 import React from 'react';
-import {Button, Container,Card,Row,Col} from 'react-bootstrap';
-import c1Image from '../../assets/c1.png'; 
-import AccountNbar from '../../component/AccountNbar';
-import { useNavigate } from 'react-router-dom';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import AdminNBar from '../../component/AdminNBar'; // Adjust the path based on your directory structure
 
 function BmanagerHome() {
-  const Navigate= useNavigate();
-  return (
-    <>
-       <div><AccountNbar/></div>
-
-<br></br>
-<br></br>
-      <div className="d-flex justify-content-around">
-        <Container>
-          <Row>
-            <Col xs={6} md={4}>
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={c1Image} />
-                <Card.Body>
-                  <Card.Title>Appointments</Card.Title>
-                  <Button onClick ={()=> Navigate("/appointmentreview")} variant="primary">Enter from here</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col xs={6} md={4}>
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={c1Image} />
-                <Card.Body>
-                  <Card.Title> Supplier Payments</Card.Title>
-                  <Button onClick ={()=> Navigate("/spaymentreview")} variant="primary">Enter from here</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col xs={6} md={4}>
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={c1Image} />
-                <Card.Body>
-                  <Card.Title>Supply</Card.Title>
-                  <Button onClick ={()=> Navigate("/supply")} variant="primary">Enter from here</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-            </Row>
-            <br></br>
-            <br></br>
-
+    return (
+        <Container fluid>
             <Row>
-            <Col xs={6} md={4}>
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={c1Image} />
-                <Card.Body>
-                  <Card.Title>Delivery</Card.Title>
-                  <Button onClick ={()=> Navigate("/delivery")} variant="primary">Enter from here</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-
-          </Row>
+                <Col xs={2} id="sidebar">
+                    <AdminNBar />
+                </Col>
+                <Col xs={10} id="page-content">
+                    {/* Your page content goes here */}
+                </Col>
+            </Row>
         </Container>
-      </div>
-    </>
-  ); 
+    );
 }
 
 export default BmanagerHome;
+
+  

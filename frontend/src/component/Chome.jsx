@@ -16,7 +16,7 @@ function Chome() {
               alt="Second slide"
               style={{
                 maxHeight: '500px',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 backgroundPosition: 'fixed'
               }}
             />

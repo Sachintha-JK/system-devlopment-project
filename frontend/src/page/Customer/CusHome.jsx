@@ -15,18 +15,7 @@ function CusHome() {
       <div className="d-flex justify-content-around">
         <Container>
           <Row>
-            <Col xs={6} md={4}>
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={c1Image} />
-                <Card.Body>
-                  <Card.Title>Availability</Card.Title>
-                  <Card.Text>
-                  Check spice types and quantities in stock to ensure you get exactly what you need, when you need it.
-                  </Card.Text>
-                  <Button onClick ={()=> Navigate("/availability")} variant="primary">View Details</Button>
-                </Card.Body>
-              </Card>
-            </Col>
+
 
             <Col xs={6} md={4}>
               <Card style={{ width: '18rem' }}>

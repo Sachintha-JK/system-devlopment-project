@@ -68,8 +68,9 @@ function Cpayments() {
         </div>
       </div>
     </th>
+    <th>Deliver Date</th>
     <th>Total Value (LKR)</th>
-    <th>Order Date</th>
+    <th>Payment Status</th>
   
   </tr>
 </thead>
@@ -89,9 +90,9 @@ function Cpayments() {
           );
         })}
       </td>
-                 <td>{customer_order.payment}</td>
-                <td>{moment(customer_order.Order_Date).format('MM/DD/YYYY')}</td>
-              
+               <td>{moment(customer_order.Deliver_Date).format('MM/DD/YYYY')}</td>
+               <td>{customer_order.Payment}</td>
+                <td>{customer_order.Payment_Status === 0 ? 'Pending' : 'Paid'}</td>
                
               </tr>
             ))}

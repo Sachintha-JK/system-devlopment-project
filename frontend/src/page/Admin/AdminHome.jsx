@@ -1,32 +1,24 @@
 import React from 'react';
 import Container from 'react-bootstrap/Container';
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import '../../css/AdminBar.css';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import AdminNBar from '../../component/AdminNBar'; // Adjust the path based on your directory structure
 
 function AdminHome() {
     return (
-      <Navbar className="vertical-navbar">
         <Container fluid>
-          <Nav className="flex-column">
-            <Nav.Link href="#adminhome">Home</Nav.Link>
-            <NavDropdown title="Register" id="features-dropdown">
-              <NavDropdown.Item href="/SupRegister">Supplier</NavDropdown.Item>
-              <NavDropdown.Item href="/CusRegister">Customer</NavDropdown.Item>
-              <NavDropdown.Item href="/ManagerRegister">Branch Manager</NavDropdown.Item>
-              {/* Add more features as needed */}
-            </NavDropdown>
-            <Nav.Link href="#pricing">Supplier Payments</Nav.Link>
-            <Nav.Link href="#pricing">Customer Payments</Nav.Link>
-            <Nav.Link href="#pricing">Orders</Nav.Link>
-            <Nav.Link href="#pricing">Availability</Nav.Link>
-           
-          </Nav>
+            <Row>
+                <Col xs={2} id="sidebar">
+                    <AdminNBar />
+                </Col>
+                <Col xs={10} id="page-content">
+                    {/* Your page content goes here */}
+                </Col>
+            </Row>
         </Container>
-      </Navbar>
     );
-  }
-  
-  export default AdminHome;
+}
+
+export default AdminHome;
+
   

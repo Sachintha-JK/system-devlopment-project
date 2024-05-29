@@ -38,7 +38,7 @@ function PriceLevel() {
               <tr key={spice.Spice_ID}>
                 <td>{spice.Spice_ID}</td>
                 <td>{spice.Spice_Name}</td>
-                <td>{spice.Value}</td>
+                <td>{spice.Buying_Price}</td>
               </tr>
             ))}
           </tbody>
