@@ -474,10 +474,90 @@ app.delete('/suppliers/:id', (req, res) => {
     });
   });
 });
+//*********get supply details(branch manager)********************* */
+
+app.get('/supply_details/:branchId', (req, res) => {
+  const branchId = req.params.branchId;
+  const sql = `
+  SELECT
+  s.Supply_ID, s.Supplier_ID, s.Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status
+FROM
+  supply s
+INNER JOIN
+  supply_item si ON s.Supply_ID = si.Supply_ID
+INNER JOIN
+  supplier su ON s.Supplier_ID = su.Supplier_ID
+WHERE
+  su.Branch_ID = ?
 
 
 
+  `;
 
+  db.query(sql, [branchId], (err, result) => {
+    if (err) {
+      console.error("Error retrieving supply details:", err);
+      return res.status(500).json({ error: "Internal Server Error", details: err });
+    }
+    return res.json(result);
+  });
+});
+
+//**************************************** */
+app.put('/update_payment_status/:supplyId', (req, res) => {
+  const supplyId = parseInt(req.params.supplyId);
+  const { Payment_Status } = req.body;
+
+  const sql = `UPDATE supply SET Payment_Status = ? WHERE Supply_ID = ?`;
+
+  db.query(sql, [Payment_Status, supplyId], (err, result) => {
+    if (err) {
+      console.error("Error updating payment status:", err);
+      return res.status(500).json({ error: "Internal Server Error", details: err });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Supply detail not found' });
+    }
+
+    res.json({ success: true, message: 'Payment status updated successfully' });
+  });
+});
+ //************************************ */ 
+
+ app.put('/reset_payment_status/:supplyId', (req, res) => {
+  const supplyId = parseInt(req.params.supplyId);
+
+  const sql = `UPDATE supply SET Payment_Status = 0 WHERE Supply_ID = ?`;
+
+  db.query(sql, [supplyId], (err, result) => {
+    if (err) {
+      console.error("Error resetting payment status:", err);
+      return res.status(500).json({ error: "Internal Server Error", details: err });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Supply detail not found' });
+    }
+
+    res.json({ success: true, message: 'Payment status reset successfully' });
+  });
+});
+
+//************************************ */
+// Express route to delete a supply record
+app.delete('/delete_supply/:supplyId', (req, res) => {
+  const supplyId = req.params.supplyId;
+  const sql = `DELETE FROM supply WHERE Supply_ID = ?`;
+
+  db.query(sql, [supplyId], (err, result) => {
+    if (err) {
+      console.error("Error deleting supply:", err);
+      return res.status(500).json({ error: "Internal Server Error", details: err });
+    }
+    return res.json({ message: "Supply deleted successfully" });
+  });
+});
 
 
 //-------------------------------------------------------------------------------------------------------
