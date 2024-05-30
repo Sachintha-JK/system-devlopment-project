@@ -455,7 +455,7 @@ app.get('/supply_details/:branchId', (req, res) => {
   const branchId = req.params.branchId;
   const sql = `
   SELECT
-  s.Supply_ID, s.Supplier_ID, s.Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status
+  s.Supply_ID, s.Supplier_ID, s.Supply_Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status
 FROM
   supply s
 INNER JOIN
@@ -573,14 +573,14 @@ app.delete('/delete_supply/:supplyId', (req, res) => {
 app.get('/supply/:supplierId', (req, res) => {
   const supplierId = req.params.supplierId;
   const sql = `
-    SELECT s.Supply_ID, s.Date, s.Payment, s.Payment_Status,
+    SELECT s.Supply_ID, s.Supply_Date, s.Payment, s.Payment_Status,
       GROUP_CONCAT(CONCAT(ss.Spice_Name, ' - ', si.Quantity, ' - ', si.Value)) AS Spices,
       SUM(si.Quantity * si.Value) AS Total_Value
     FROM supply s
     JOIN supply_item si ON si.Supply_ID = s.Supply_ID
     JOIN spice ss ON ss.Spice_ID = si.Spice_ID
     WHERE s.Supplier_ID = ?
-    GROUP BY s.Supply_ID, s.Date, s.Payment, s.Payment_Status
+    GROUP BY s.Supply_ID, s.Supply_Date, s.Payment, s.Payment_Status
   `;
 
   db.query(sql, [supplierId], (err, data) => {
@@ -596,8 +596,8 @@ app.get('/supply/:supplierId', (req, res) => {
     return res.json({ supplies: data });
   });
 });
-//************************************ */
-//-----------------------Appointments
+
+//-----------------------VIEW Appointments
 app.get('/appointment/:supplierId', (req, res) => {
   const supplierId = req.params.supplierId;
   const sql = "SELECT * FROM appointment WHERE Supplier_ID = ?";
@@ -607,6 +607,143 @@ app.get('/appointment/:supplierId', (req, res) => {
     return res.json({ appointments: data });
   });
 });
+//************************Place appointment* */
+app.post('/appointment', (req, res) => {
+  const { supplierId, selecteddate, time, description } = req.body;
+  const currentDate = moment().format('YYYY-MM-DD'); // Get the current date in 'YYYY-MM-DD' format
+
+  const sql = "INSERT INTO appointment (Supplier_ID, Date, Selected_Date, Time, Comment, Approval) VALUES (?, ?, ?, ?, ?, 10)"; // Assuming '10' is the default value for 'Approval'
+
+  db.query(sql, [supplierId, currentDate, selecteddate, time, description], (err, result) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    return res.status(201).json({ message: "Appointment created successfully", appointmentId: result.insertId });
+  });
+});
+//********************************view supplies(branch manager)****************************** */
+app.get('/spice_quantities/:branchId', (req, res) => {
+  const branchId = req.params.branchId;
+  const sql = `
+    SELECT
+      si.Spice_ID,
+      sp.Spice_Name,
+      SUM(si.Quantity) as Total_Quantity
+    FROM
+      supply_item si
+    INNER JOIN
+      supply s ON si.Supply_ID = s.Supply_ID
+    INNER JOIN
+      supplier su ON s.Supplier_ID = su.Supplier_ID
+    INNER JOIN
+      spice sp ON si.Spice_ID = sp.Spice_Id
+    WHERE
+      su.Branch_ID = ?
+    GROUP BY
+      si.Spice_ID, sp.Spice_Name
+  `;
+
+  db.query(sql, [branchId], (err, result) => {
+    if (err) {
+      console.error("Error retrieving spice quantities:", err);
+      return res.status(500).json({ error: "Internal Server Error", details: err });
+    }
+    return res.json(result);
+  });
+});
+//*******************************Add supply */
+app.post('/add_supply', async (req, res) => {
+  try {
+    console.log('Received supply data:', req.body); 
+    const { contactNumber, supplyItems, supplyValue } = req.body; // Include supplyValue
+    const Supply_Date = moment().format('YYYY-MM-DD');
+
+    console.log('Supply Date:', Supply_Date);
+    console.log('Contact Number:', contactNumber); // Log the contact number
+
+    // Fetch Supplier_ID based on contact number
+    const supplierQuery = 'SELECT Supplier_ID FROM supplier WHERE Contact_Number = ?';
+    const supplierResult = await new Promise((resolve, reject) => {
+      db.query(supplierQuery, [contactNumber], (err, result) => {
+        if (err) {
+          console.error('Error fetching Supplier_ID:', err);
+          return reject(err);
+        }
+        if (result.length === 0) {
+          return reject(new Error('Supplier not found'));
+        }
+        resolve(result[0].Supplier_ID);
+      });
+    });
+
+    const Supplier_ID = supplierResult;
+    console.log('Fetched Supplier_ID:', Supplier_ID);
+
+    const insertSupplyQuery = 'INSERT INTO supply (Supplier_ID, Supply_Date, Payment) VALUES (?, ?, ?)';
+    const insertSupplyItemQuery = 'INSERT INTO supply_item (Supply_ID, Spice_ID, Quantity, Value) VALUES (?, ?, ?, ?)';
+
+    // Insert into supply table
+    const supplyResult = await new Promise((resolve, reject) => {
+      db.query(insertSupplyQuery, [Supplier_ID, Supply_Date, supplyValue], (err, result) => {
+        if (err) {
+          console.error('Error inserting Supply:', err);
+          return reject(err);
+        }
+        console.log('Supply Insert Result:', result);
+        resolve(result);
+      });
+    });
+
+    const Supply_ID = supplyResult.insertId;
+    console.log('Generated Supply_ID:', Supply_ID);
+
+    // Insert into supply_item table for each item in the supplyItems array
+    const supplyItemPromises = supplyItems.map(item => {
+      return new Promise((resolve, reject) => {
+        db.query(insertSupplyItemQuery, [Supply_ID, item.Spice_ID, item.Quantity, item.Value], (err) => {
+          if (err) {
+            console.error('Error inserting supply item:', err);
+            return reject(err);
+          }
+          resolve();
+        });
+      });
+    });
+
+    await Promise.all(supplyItemPromises);
+    res.status(200).json({ message: 'Supply placed successfully!' });
+  } catch (error) {
+    console.error('Error placing supply:', error);
+    res.status(500).json({ error: 'Failed to place supply' });
+  }
+});
+
+//------------------------------Find Supplier to add supply---------------------
+app.get('/find_supplier', (req, res) => {
+  const {contact } = req.query;
+  const query = `
+    SELECT Supplier_ID
+    FROM supplier
+    WHERE Contact_Number = ?
+  `;
+  db.query(query, [contact], (err, result) => {
+    if (err) {
+      res.status(500).send({ message: err.message });
+    } else {
+      if (result.length > 0) {
+        res.send({ supplier: result[0] });
+      } else {
+        // If supplier not found
+        console.log('Supplier not found');
+        res.status(404).send({ message: "Supplier not found" });
+      }
+    }
+  });
+});
+
+
+
 
 
 

@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter,Routes,Route } from 'react-router-dom';
 import Home from './page/Home';
 import Login from './page/Login';
+import Cpassword from './page/Cpassword';
 import Signup from './page/Signup';
 import SupHome from './page/Supplier/SupHome';
 import Appointment from './page/Supplier/Appointment';
@@ -12,13 +13,13 @@ import CusHome from './page/Customer/CusHome';
 import Orders from './page/Customer/Orders';
 import Cpayments from './page/Customer/Cpayments';
 import BmanagerHome from './page/BranchManager/BmanagerHome';
-import AppointmentReview from './page/BranchManager/AppointmentReview';
+import BranchStock from './page/BranchManager/BranchStock';
 import Supply from './page/BranchManager/Supply';
-import Cpassword from './page/ANavBar/Cpassword';
 import AdminHome from './page/Admin/AdminHome';
 import SupRegister from './page/BranchManager/SupRegister';
 import CusRegister from './page/Admin/CusRegister';
 import ManagerRegister from './page/Admin/ManagerRegister';
+import AviewSupplier from './page/Admin/AviewSupplier';
 
 
 function App() {
@@ -38,12 +39,13 @@ function App() {
 <Route path='/cpayments' element={<Cpayments/>}></Route>
 <Route path='/orders' element={<Orders/>}></Route>
 <Route path='/bmanagerhome' element={<BmanagerHome/>}></Route>
-<Route path='/appointmentreview' element={<AppointmentReview/>}></Route>
 <Route path='/supply' element={<Supply/>}></Route>
 <Route path='/adminhome' element={<AdminHome/>}></Route>
 <Route path='/SupRegister' element={<SupRegister/>}></Route>
 <Route path='/CusRegister' element={<CusRegister/>}></Route>
 <Route path='/ManagerRegister' element={<ManagerRegister/>}></Route>
+<Route path='/branchstock' element={<BranchStock/>}></Route>
+<Route path='/aviewsupplier' element={<AviewSupplier/>}></Route>
 
 </Routes>
 

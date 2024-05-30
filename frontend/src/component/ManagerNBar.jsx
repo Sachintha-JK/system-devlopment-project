@@ -1,20 +1,23 @@
-import React from 'react';
-import Navbar from 'react-bootstrap/Navbar';
+import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 function AdminNavbar() {
-    return (
-        <Navbar className="vertical-navbar" expand="lg" style={{ fontSize: '18px', backgroundColor: '#1F618D', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+  return (
+    <Navbar expand="lg" style={{ fontSize: '28px', backgroundColor: '#1F618D' }}>
+      <Container>
+            <Navbar.Brand href="/">Branch Manager</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="mr-auto flex-column" style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-
-                    <Nav.Link href="/SupRegister" style={{ color: 'white' }}>Supplier </Nav.Link>
-                    <Nav.Link href="/supply" style={{ color: 'white' }}>Supply</Nav.Link>
-                    <Nav.Link href="#availability" style={{ color: 'white' }}>Availability</Nav.Link>
+                <Nav className="ml-auto">
+                    <Nav.Link href="/SupRegister" style={{ color: 'black' }}>Supplier</Nav.Link>
+                    <Nav.Link href="/supply" style={{ color: 'black' }}>Supply</Nav.Link>
+                    <Nav.Link href="/branchstock" style={{ color: 'black' }}>Availability</Nav.Link>
+            
                 </Nav>
             </Navbar.Collapse>
+            </Container>
         </Navbar>
     );
 }

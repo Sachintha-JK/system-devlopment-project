@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AccountNbar from '../../component/AccountNbar';
-import { Button, Form, Table, Offcanvas, Alert } from 'react-bootstrap';
+import { Button, Form, Table, Offcanvas } from 'react-bootstrap';
 import moment from 'moment';
 
 function Appointment() {
@@ -9,7 +9,7 @@ function Appointment() {
   const [appointments, setAppointments] = useState([]);
   const [showScheduledAppointments, setShowScheduledAppointments] = useState(false);
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0], // Current date
+    selecteddate: new Date().toISOString().split('T')[0], // Current date as default
     time: '',
     description: ''
   });
@@ -55,16 +55,15 @@ function Appointment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Submit form data to server
       await axios.post('http://localhost:8081/appointment', {
         supplierId: supplierId,
-        date: formData.date,
+        selecteddate: formData.selecteddate,
         time: formData.time,
         description: formData.description
       });
       // Reset form after successful submission
       setFormData({
-        date: new Date().toISOString().split('T')[0],
+        selecteddate: new Date().toISOString().split('T')[0],
         time: '',
         description: ''
       });
@@ -82,7 +81,9 @@ function Appointment() {
         <h1>Appointments</h1>
       </div>
       <div style={{ display: 'inline-block' }}>
-        <Button variant="success" onClick={handleShowScheduledAppointments} style={{ marginLeft: '60px' }}>My Scheduled Appointments</Button>
+        <Button variant="success" onClick={handleShowScheduledAppointments} style={{ marginLeft: '60px' }}>
+          My Scheduled Appointments
+        </Button>
       </div>
       <br />
       <br />
@@ -90,27 +91,48 @@ function Appointment() {
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3" controlId="formBasicDate">
             <Form.Label>Date</Form.Label>
-            <Form.Control type="date" placeholder="Select the Date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+            <Form.Control 
+              type="date" 
+              placeholder="Select the Date" 
+              value={formData.selecteddate} 
+              onChange={(e) => setFormData({ ...formData, selecteddate: e.target.value })} 
+              required 
+            />
           </Form.Group>
           <Form.Group className="mb-3" controlId="formBasicTime">
             <Form.Label>Time</Form.Label>
-            <Form.Control type="time" placeholder="Select the Time" value={formData.time} onChange={(e) => setFormData({ ...formData, time: e.target.value })} />
+            <Form.Control 
+              type="time" 
+              placeholder="Select the Time" 
+              value={formData.time} 
+              onChange={(e) => setFormData({ ...formData, time: e.target.value })} 
+              required 
+            />
           </Form.Group>
-          <Form.Group className="mb-3 custom-form-group" controlId="formBasicType">
+          <Form.Group className="mb-3" controlId="formBasicDescription">
             <Form.Label>Description</Form.Label>
-            <Form.Control as="textarea" rows={3} placeholder="Description about Spice Types and Quantities" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+            <Form.Control 
+              as="textarea" 
+              rows={3} 
+              placeholder="Description about the appointment" 
+              value={formData.description} 
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+              required 
+            />
           </Form.Group>
           <Button variant="primary" type="submit">
             Submit
           </Button>
         </Form>
       </div>
-      <Offcanvas show={showScheduledAppointments} onHide={handleCloseScheduledAppointments}>
+      <Offcanvas show={showScheduledAppointments} 
+      onHide={handleCloseScheduledAppointments}
+      style={{ width: '80%' }} >
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>My Scheduled Appointments</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-        <Table striped bordered hover>
+          <Table striped bordered hover>
             <thead>
               <tr>
                 <th>Appointment ID</th>
@@ -124,7 +146,7 @@ function Appointment() {
               {appointments.map((appointment) => (
                 <tr key={appointment.Appointment_ID}>
                   <td>{appointment.Appointment_ID}</td>
-                  <td>{moment(appointment.Date).format('MM/DD/YYYY')}</td>
+                  <td>{moment(appointment.Selected_Date).format('MM/DD/YYYY')}</td>
                   <td>{appointment.Time}</td>
                   <td>{appointment.Comment}</td>
                   <td>{appointment.Approval === 1 ? 'Approved' : appointment.Approval === 10 ? 'Pending' : appointment.Approval === 0 ? 'Declined' : ''}</td>

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Container, Button } from 'react-bootstrap';
+import { Table, Container, Button, Modal } from 'react-bootstrap';
+
+import AddSupply from '../../component/AddSupply';
 
 function Supply() {
   const [supplyDetails, setSupplyDetails] = useState([]);
   const [spices, setSpices] = useState([]);
   const [branchId, setBranchId] = useState(null);
+  const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
 
   useEffect(() => {
     const fetchBranchManager = async () => {
@@ -83,8 +86,6 @@ function Supply() {
     }
   };
 
-
-
   const handleDeleteClick = async (index, supplyId) => {
     try {
       // Call backend route to delete supply
@@ -98,15 +99,26 @@ function Supply() {
       // Handle error, display error message, etc.
     }
   };
-  
-  
 
+  const handleAddSupplyClick = () => {
+    setShowAddSupplyModal(true);
+  };
 
+  const handleCloseAddSupplyModal = () => {
+    setShowAddSupplyModal(false);
+  };
 
+  const handleAddSupply = (newSupply) => {
+    setSupplyDetails([...supplyDetails, newSupply]);
+    setShowAddSupplyModal(false); // Close modal after adding supply
+  };
 
   return (
     <Container className="mt-5">
       <h1>Supply Details</h1>
+      <Button variant="primary" onClick={handleAddSupplyClick} className="mb-3">
+        Add Supply
+      </Button>
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -126,7 +138,7 @@ function Supply() {
             <tr key={detail.Supply_ID}>
               <td>{detail.Supply_ID}</td>
               <td>{detail.Supplier_ID}</td>
-              <td>{new Date(detail.Date).toLocaleDateString()}</td>
+              <td>{new Date(detail.Supply_Date).toLocaleDateString()}</td>
               <td>{spices.find(spice => spice.Spice_Id === detail.Spice_ID)?.Spice_Name}</td>
               <td>{detail.Quantity}</td>
               <td>{detail.Value}</td>
@@ -140,25 +152,35 @@ function Supply() {
                 />
               </td>
               <td>
-  <Button
-    variant="warning"
-    onClick={() => handleEditClick(index, detail.Supply_ID)}
-    disabled={!detail.disabled}
-    style={{ marginRight: '5px' }} // Add margin-right to create a gap
-  >
-    Edit
-  </Button>
-  <Button
-    variant="danger"
-    onClick={() => handleDeleteClick(index, detail.Supply_ID)}
-  >
-    Delete
-  </Button>
-</td>
+                <Button
+                  variant="warning"
+                  onClick={() => handleEditClick(index, detail.Supply_ID)}
+                  disabled={!detail.disabled}
+                  style={{ marginRight: '5px' }} // Add margin-right to create a gap
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => handleDeleteClick(index, detail.Supply_ID)}
+                >
+                  Delete
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>
       </Table>
+
+      {/* AddSupply Modal */}
+      <Modal show={showAddSupplyModal} onHide={handleCloseAddSupplyModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Supply</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <AddSupply onAddSupply={handleAddSupply} />
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 }
