@@ -49,7 +49,7 @@ function Login() {
     <div className='logsignup-container' style={{ backgroundImage: `url(${backgroundImage})` }}>
       <div className='logsignup-form'>
         <form onSubmit={handleSubmit}>
-          <h1>Login</h1>
+        <h1 style={{ textAlign: 'center' }}>Login</h1>
           <div className='logsignup-input'>
             <label htmlFor='User_Name'>User Name</label>
             <input 

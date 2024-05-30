@@ -1,152 +1,169 @@
-import React, { useState } from 'react';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Button, Table, Container, Row, Col, Form } from 'react-bootstrap';
+import AddCustomer from '../../component/AddCustomer';
+import EditCustomer from '../../component/EditCustomer';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import '../../css/Register.css';
 
 function CusRegister() {
-    
-    const [userName, setUserName] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
-    const [contactNumber, setContactNumber] = useState('');
-    const [email, setEmail] = useState('');
-    const [companyname, setCompanyName] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-
-        // Form validation: Check if any field is blank
-        if (!userName || !password || !name || !email || !contactNumber || !companyname) {
-            toast.error("Please fill in all fields."); // Display error notification
-            return; // Exit function if any field is blank
-        }
-
-
-        try {
-            // Send a POST request to create a new user
-            const userResponse = await axios.post('http://localhost:8081/user', {
-                User_Name: userName,
-                User_Type: 'Customer',
-                Password: password,
-            });
-
-            // Extract the User_ID from the response
-            const userId = userResponse.data.User_ID;
-
-            // Send a POST request to create a new Customer, with the retrieved User_ID
-            const customerResponse = await axios.post('http://localhost:8081/customer', {
-                Name: name,
-                Contact_Number: contactNumber,
-                Email: email,
-                User_ID: userId,
-                Company_Name: companyname
-            });
-
-            // Show success notification
-            toast.success("Customer registered successfully!");
-
-            // Clear form fields
-            clearForm();
-        } catch (error) {
-            // Show error notification
-            toast.error("Error registering Customer. Please try again.");
-            console.error('Error:', error.response.data);
-        }
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/customers');
+        setCustomers(response.data);
+        setFilteredCustomers(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching customers:', error);
+        setError('Error fetching customers. Please try again later.');
+        setLoading(false);
+      }
     };
 
-    const clearForm = () => {
-        setUserName('');
-        setPassword('');
-        setName('');
-        setContactNumber('');
-        setEmail('');
-        setCompanyName('');
-    };
+    fetchCustomers();
+  }, []);
 
-    return (
-        <div>
-            <br />
-            <div style={{ textAlign: 'center' }}>
-                <h1>Register-Customer</h1>
-            </div>
-            <br />
-            <br />
-            <div className="sup-register-form-container">
-                <Form className="sup-register-form" onSubmit={handleSubmit}>
+  const handleEdit = (customer) => {
+    setSelectedCustomer(customer);
+    setShowEditModal(true);
+  };
 
-                <Form.Group className="mb-3" id="formGridName">
-                        <Form.Label>Company Name</Form.Label>
-                        <Form.Control
-                            type="Text"
-                            placeholder="Enter the Company Name"
-                            value={companyname}
-                            onChange={(e) => setCompanyName(e.target.value)}
-                        />
-                    </Form.Group>
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
 
+  const handleToggleStatus = async (customer) => {
+  const newStatus = customer.Active_Status === 1 ? 0 : 1;
+  const action = newStatus === 1 ? 'activate' : 'deactivate';
 
-                    <Form.Group className="mb-3" id="formGridName">
-                        <Form.Label>Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter name with surname"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
-                    </Form.Group>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="formGridUserName">
-                            <Form.Label>UserName</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter UserName"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridPassword">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </Form.Group>
-                    </Row>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="formGridCnumberr">
-                            <Form.Label>Contact Number</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter the contact number"
-                                value={contactNumber}
-                            onChange={(e) => setContactNumber(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridemail">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter the Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </Form.Group>
-                    </Row>
-        
+  try {
+    const response = await axios.put(`http://localhost:8081/${action}customer/${customer.Customer_ID}`, {
+      Active_Status: newStatus,
+    });
+    const updatedCustomer = response.data;
+    console.log("Updated customer:", updatedCustomer);
 
-                    <Button variant="primary" type="submit">
-                        Submit
-                    </Button>
-                </Form>
-            </div>
-            <ToastContainer />
-        </div>
+    // Update the local state with the updated customer
+    setCustomers(customers.map(c => c.Customer_ID === updatedCustomer.Customer_ID ? updatedCustomer : c));
+    filterCustomers(searchTerm); // Call the filterCustomers function
+  } catch (error) {
+    console.error(`Error ${action} customer:`, error);
+  }
+}
+
+  
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    filterCustomers(event.target.value);
+  };
+
+  const filterCustomers = (searchTerm) => {
+    const filtered = customers.filter((customer) =>
+      customer.Company_Name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    setFilteredCustomers(filtered);
+  };
+
+  const handleClose = () => {
+    setShowPopup(false);
+  };
+
+  return (
+    <Container>
+      <Row className="mt-3">
+        <Col>
+          <h1>Customers</h1>
+        </Col>
+        <Col xs="auto">
+          <Button variant="primary" onClick={() => setShowPopup(true)}>
+            {showPopup ? 'Close' : 'Register Customer'}
+          </Button>
+        </Col>
+      </Row>
+
+      <Row className="mt-3">
+        <Col>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Control
+                type="text"
+                placeholder="Search by Company Name"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </Form.Group>
+          </Form>
+        </Col>
+      </Row>
+
+      {error && <p className="text-danger">{error}</p>}
+
+      {!loading && !error && (
+        <Row className="mt-3">
+          <Col>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Customer ID</th>
+                  <th>Name</th>
+                  <th>Company Name</th>
+                  <th>Contact Number</th>
+                  <th>Email</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(searchTerm ? filteredCustomers : customers).map((customer) => (
+                  <tr key={customer.Customer_ID}>
+                    <td>{customer.Customer_ID}</td>
+                    <td>{customer.Name}</td>
+                    <td>{customer.Company_Name}</td>
+                    <td>{customer.Contact_Number}</td>
+                    <td>{customer.Email}</td>
+                    <td>
+                      <Button variant="info" className="mr-2" onClick={() => handleEdit(customer)}>
+                        Edit
+                      </Button>
+                      <Button
+  variant={customer.Active_Status === 1 ? "danger" : "success"}
+  style={{ marginLeft: '5px' }}
+  onClick={() => handleToggleStatus(customer)}
+>
+  {customer.Active_Status === 1 ? "Deactivate" : "Activate"}
+</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+      )}
+
+      {showPopup && (
+        <Row className="mt-3">
+          <Col>
+            <AddCustomer handleClose={handleClose} customers={customers} />
+          </Col>
+        </Row>
+      )}
+
+      {showEditModal && (
+        <EditCustomer
+          customer={selectedCustomer}
+          handleClose={handleCloseEditModal}
+        />
+      )}
+    </Container>
+  );
 }
 
 export default CusRegister;

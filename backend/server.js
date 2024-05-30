@@ -18,9 +18,7 @@ password:"",
 database:"spicemart"
 })*/
 
-//--------------------------------------------------------------------------------------------------
-//login
-
+//---------login-----------------------------------------------------------------------------------------
 app.post('/login',(req,res)=>{
     const sql="SELECT * FROM user WHERE User_Name=? and Password=? ";
     
@@ -44,7 +42,6 @@ app.post('/login',(req,res)=>{
   });
 
 //-------------------customer local storage------------------------------------
-
 app.get('/customer/:userId', (req, res) => {
   const userId = req.params.userId;  
   const sql = "SELECT Customer_ID FROM customer WHERE User_ID = ?";
@@ -78,14 +75,9 @@ app.get('/branch_manager/:userId', async (req, res) => {
     return res.json({ managerId: data[0].Manager_ID });
   });
 });
-
-
-
-
 //************spices dropdown
 
 app.get('/spice', (req, res) => {
-
   const sql = 'SELECT Spice_Id, Spice_Name FROM spice';
   db.query(sql, (err, result) => {
     if (err) {
@@ -96,10 +88,8 @@ app.get('/spice', (req, res) => {
     }
   });
 });
- 
 
-//--------------------------------------------------------------------------------------------------------
-//Change Password
+//--------Change Password------------------------------------------------------------------------------------------------
 app.post('/change-password', (req, res) => {
   const { username, currentPassword, newPassword } = req.body;
   const sqlCheck = "SELECT * FROM user WHERE User_Name=?";
@@ -127,8 +117,7 @@ app.post('/change-password', (req, res) => {
   });
 });
 
-///--------------------------------------------------------------------------------------------------
-// Register User
+///----------Register User----------------------------------------------------------------------------------------
 app.post('/user', async (req, res) => {
   const { User_Name, User_Type, Password } = req.body;
   try {
@@ -136,7 +125,6 @@ app.post('/user', async (req, res) => {
       'INSERT INTO user (User_Name, User_Type, Password) VALUES (?, ?, ?)',
       [User_Name, User_Type, Password]
     );
-
     // Retrieve the last inserted User_ID
     db.query("SELECT LAST_INSERT_ID() AS User_ID;", (err, result) => {
       if (err) {
@@ -144,7 +132,6 @@ app.post('/user', async (req, res) => {
         res.status(500).send("Error retrieving last inserted User_ID");
         return;
       }
-      
       // Extract the User_ID from the result
       const user_id = result[0].User_ID;
 
@@ -157,8 +144,7 @@ app.post('/user', async (req, res) => {
   }
 });
 
-//----------------------------------------------------------------------------------------------
-// Register Branch Manager
+//------------ Register Branch Manager----------------------------------------------------------------------------------
 app.post('/branch_manager', async (req, res) => {
   const { Name, Contact_Number, Email, Branch_Name } = req.body;
   try {
@@ -173,10 +159,7 @@ app.post('/branch_manager', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-
-//----------------------------------------------------------------------------------------------
-// Register Customer
+//------------- Register Customer---------------------------------------------------------------------------------
 app.post('/customer', async (req, res) => {
   const { Company_Name,Name, Contact_Number, Email } = req.body;
   try {
@@ -191,10 +174,7 @@ app.post('/customer', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-
-//-------------------------------------------------------------------------------------------------------
-//Supplier- Price Level
+//-----------Supplier- Price Level--------------------------------------------------------------------------------------------
 app.get('/spices', (req, res) => {
   const sql = 'SELECT * FROM spice';
 
@@ -248,7 +228,6 @@ app.post('/place_order', async (req, res) => {
     res.status(500).json({ error: 'Failed to place order' });
   }
 });
-
 //---------------Payment-Customer view
 
 app.get('/customer_order/:customerId', (req, res) => {
@@ -279,7 +258,6 @@ GROUP BY o.Order_ID, o.Deliver_Date, ao.Payment
     return res.json({ orders: data });
   });
 });
-
 //---------Availability table
 app.get('/check_stock', (req, res) => {
   const sql = 'SELECT Spice_Name, Selling_Price,Stock FROM spice';
@@ -297,7 +275,6 @@ app.get('/check_stock', (req, res) => {
     return res.json({ spices: data });
   });
 });
-
 //********************get branch_manager userID************************** */
 
 app.get('/find_branch_manager/:userId', (req, res) => {
@@ -315,7 +292,6 @@ app.get('/find_branch_manager/:userId', (req, res) => {
     return res.json(result[0]);
   });
 });
-
 // ------view supplier(branch manager)
 app.get('/suppliers/:branchId', (req, res) => {
   const branchId = req.params.branchId;
@@ -741,11 +717,88 @@ app.get('/find_supplier', (req, res) => {
     }
   });
 });
+//**************View Suppliers(Branch Manager) */
 
+app.get('/suppliers', async (req, res) => {
+  try {
+    const query = 'SELECT s.*, b.Branch_Name FROM supplier s INNER JOIN branch b ON s.Branch_ID = b.Branch_ID';
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error('Error fetching supplier data:', err);
+        return res.status(500).json({ error: 'Failed to fetch supplier data' });
+      }
+      res.status(200).json(results);
+    });
+  } catch (error) {
+    console.error('Error handling request:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
+//**********view customers******** */
+app.get('/customers', (req, res) => {
+  const query = 'SELECT * FROM customer';
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching customer data:', err);
+      return res.status(500).json({ error: 'Failed to fetch customer data' });
+    }
+    res.status(200).json(results);
+  });
+});
+//********************************************** */
+app.put('/updatecustomer/:id', (req, res) => {
+  const { id } = req.params;
+  const { Name, Company_Name, Contact_Number, Email } = req.body;
+  const sql = 'UPDATE customer SET Name = ?, Company_Name = ?, Contact_Number = ?, Email = ? WHERE Customer_ID = ?';
+  db.query(sql, [Name, Company_Name, Contact_Number, Email, id], (err, result) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.send({ success: true });
+    }
+  });
+});
+//*********************deactivate customer */
+// Assuming you have already set up your Express app and configured routes
 
+// Endpoint to handle updating customer's Active_Status
+app.put('/deactivateCustomer/:id', (req, res) => {
+  const { id } = req.params;
+  console.log(`Attempting to deactivate customer with ID: ${id}`);
+  const sql = 'UPDATE customer SET Active_Status = 0 WHERE Customer_ID = ?';
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('SQL Error:', err);
+      res.status(500).send({ error: 'Database query failed', details: err });
+    } else if (result.affectedRows === 0) {
+      console.warn(`Product with ID: ${id} not found`);
+      res.status(404).send({ error: 'Product not found' });
+    } else {
+      console.log(`Product with ID: ${id} deactivated successfully`);
+      res.send({ success: true });
+    }
+  });
+});
 
-
+//******************** */
+app.put('/activatecustomer/:id', (req, res) => {
+  const { id } = req.params;
+  console.log(`Attempting to activate customer with ID: ${id}`);
+  const sql = 'UPDATE customer SET Active_Status = 1 WHERE Customer_ID = ?';
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('SQL Error:', err);
+      res.status(500).send({ error: 'Database query failed', details: err });
+    } else if (result.affectedRows === 0) {
+      console.warn(`Customer with ID: ${id} not found`);
+      res.status(404).send({ error: 'Customer not found' });
+    } else {
+      console.log(`Customer with ID: ${id} activated successfully`);
+      res.send({ Customer_ID: id, Active_Status: 1 });
+    }
+  });
+});
 
 //-------------------------------------------------------------------------------------------------------
 
