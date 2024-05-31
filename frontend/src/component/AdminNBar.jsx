@@ -17,7 +17,7 @@ function AdminNavbar() {
                     </NavDropdown>
                     <Nav.Link href="/spaymentview" style={{ color: 'white' }}>Supplier Payments</Nav.Link>
                     <Nav.Link href="/cpaymentview" style={{ color: 'white' }}>Customer Payments</Nav.Link>
-                    <Nav.Link href="#orders" style={{ color: 'white' }}>Orders</Nav.Link>
+                    <Nav.Link href="/orderview" style={{ color: 'white' }}>Orders</Nav.Link>
                     <Nav.Link href="/stock" style={{ color: 'white' }}>Spice Types</Nav.Link>
                 </Nav>
             </Navbar.Collapse>

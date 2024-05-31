@@ -919,7 +919,7 @@ app.put('/toggleProductStatus/:id/:status', (req, res) => {
   });
 });
 
-
+//edit spice------------------------------------------------------------------------
 
 app.put('/editspice/:id', (req, res) => {
   const spiceId = req.params.id;
@@ -943,7 +943,7 @@ app.put('/editspice/:id', (req, res) => {
   });
 });
 
-
+//*****************************Add Spice */
 app.post('/addspice', (req, res) => {
   const newSpice = req.body; // Assuming the new spice data is sent in the request body
   
@@ -961,6 +961,37 @@ app.post('/addspice', (req, res) => {
     }
   });
 });
+
+//**************************************calendar */
+app.get('/calendar_order', (req, res) => {
+  const sql = `SELECT o.Order_ID, o.Deliver_Date, c.Company_Name, c.Name,
+  GROUP_CONCAT(CONCAT(s.Spice_Name, ' - ', os.Quantity, ' - ', os.Value, ' ')) AS Products,
+  SUM(os.Quantity * os.Value) AS Total_Value,
+  SUM(os.Value) AS Total_Payment,
+  o.Accept_Status AS Approval
+FROM customer_order o
+JOIN order_spice os ON os.Order_ID = o.Order_ID
+JOIN spice s ON os.Spice_ID = s.Spice_ID
+JOIN customer c ON o.Customer_ID = c.Customer_ID
+GROUP BY o.Order_ID, o.Deliver_Date, c.Company_Name, c.Name`;
+;
+
+  db.query(sql, (err, data) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (data.length === 0) {
+      console.log('No orders found');
+      return res.status(404).json({ error: "Orders not found" });
+    }
+    console.log('Query result:', data);
+    return res.json({ orders: data });
+  });
+});
+
+// Fetch customer details by ID
+
 //-------------------------------------------------------------------------------------------------------
 
 app.listen(8081,()=>{

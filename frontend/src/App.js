@@ -22,6 +22,7 @@ import ManagerRegister from './page/Admin/ManagerRegister';
 import AviewSupplier from './page/Admin/AviewSupplier';
 import SpaymentView from './page/Admin/SpaymentView';
 import CpaymentView from './page/Admin/CpaymentView';
+import OrderView from './page/Admin/OrderView';
 import Stock from './page/Admin/Stock';
 
 
@@ -52,6 +53,7 @@ function App() {
 <Route path='/aviewsupplier' element={<AviewSupplier/>}></Route>
 <Route path='/spaymentview' element={<SpaymentView/>}></Route>
 <Route path='/cpaymentview' element={<CpaymentView/>}></Route>
+<Route path='/orderview' element={<OrderView/>}></Route>
 <Route path='/stock' element={<Stock/>}></Route>
 
 </Routes>
