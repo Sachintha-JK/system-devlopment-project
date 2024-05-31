@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+
 function Suppliers() {
   const [suppliers, setSuppliers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,7 +40,7 @@ function Suppliers() {
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ marginBottom: '10px' }}
         />
-        <table className="table table-bordered" style={{ border: '2px solid black' }}>
+        <table className="table table-striped" style={{ border: '2px solid black' }}>
           <thead className="thead-dark">
             <tr>
               <th>Supplier ID</th>

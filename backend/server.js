@@ -146,19 +146,24 @@ app.post('/user', async (req, res) => {
 
 //------------ Register Branch Manager----------------------------------------------------------------------------------
 app.post('/branch_manager', async (req, res) => {
-  const { Name, Contact_Number, Email, Branch_Name } = req.body;
-  try {
-    const result = await db.query(
-      'INSERT INTO branch_manager (Name, Contact_Number, Email, Branch_Name, User_ID) VALUES (?, ?, ?, ?, LAST_INSERT_ID())',
-      [Name, Contact_Number, Email, Branch_Name]
-    );
+  const { Name, Contact_Number, Email, Branch_ID, User_ID } = req.body;
+  console.log("Received data to register branch manager:", req.body);
 
-    res.status(201).send("Branch manager registered successfully");
+  try {
+      const result = await db.query(
+          'INSERT INTO branch_manager (Name, Contact_Number, Email, Branch_ID, User_ID) VALUES (?, ?, ?, ?, ?)',
+          [Name, Contact_Number, Email, Branch_ID, User_ID]
+      );
+
+      console.log("Branch manager registered successfully:", result);
+      res.status(201).send("Branch manager registered successfully");
   } catch (err) {
-    console.error('Error registering Manager:', err);
-    res.status(500).send('Server error');
+      console.error('Error registering Manager:', err);
+      res.status(500).send('Server error');
   }
 });
+
+
 //------------- Register Customer---------------------------------------------------------------------------------
 app.post('/customer', async (req, res) => {
   const { Company_Name,Name, Contact_Number, Email } = req.body;
@@ -760,9 +765,6 @@ app.put('/updatecustomer/:id', (req, res) => {
   });
 });
 //*********************deactivate customer */
-// Assuming you have already set up your Express app and configured routes
-
-// Endpoint to handle updating customer's Active_Status
 app.put('/deactivateCustomer/:id', (req, res) => {
   const { id } = req.params;
   console.log(`Attempting to deactivate customer with ID: ${id}`);
@@ -797,9 +799,168 @@ app.put('/activatecustomer/:id', (req, res) => {
       console.log(`Customer with ID: ${id} activated successfully`);
       res.send({ Customer_ID: id, Active_Status: 1 });
     }
+  }); 
+});
+//**************vuew managers(admin)************************** */
+app.get('/viewbmanagers', (req, res) => {
+  const query = 'SELECT m.*, b.Branch_Name FROM branch_manager m INNER JOIN branch b ON m.Branch_ID = b.Branch_ID';
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching manager data:', err);
+      return res.status(500).json({ error: 'Failed to fetch manager data' });
+    }
+    res.status(200).json(results);
+  });
+});
+/*************************branch dropdown */
+app.get('/branches', (req, res) => {
+  const query = 'SELECT Branch_ID, Branch_Name FROM branch';
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching branches:', err);
+          return res.status(500).json({ error: 'Failed to fetch branches' });
+      }
+      res.status(200).json(results);
+  });
+});
+//*********************************** */
+app.get('/supply_details', (req, res) => {
+  const sql = `
+  SELECT
+    s.Supply_ID, s.Supplier_ID, su.Name, s.Supply_Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status
+  FROM
+    supply s
+  INNER JOIN
+    supply_item si ON s.Supply_ID = si.Supply_ID
+  INNER JOIN
+    supplier su ON s.Supplier_ID = su.Supplier_ID
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error retrieving supply details:", err);
+      return res.status(500).json({ error: "Internal Server Error", details: err });
+    }
+    return res.json(result);
+  });
+});
+//********************************************** */
+app.get('/customer_orders', (req, res) => {
+  const sql = `SELECT customer_order.Order_ID, customer_order.Customer_ID, accept_order.Payment, accept_order.Payment_Status, customer_order.Order_Date, customer_order.Deliver_Date, customer.Name, customer.Contact_Number,
+  GROUP_CONCAT(CONCAT_WS(' - ', spice.Spice_Name, order_spice.Quantity, order_spice.Value) SEPARATOR ',\n') as 'Product Details'
+FROM customer_order
+INNER JOIN customer ON customer_order.Customer_ID = customer.Customer_ID
+LEFT JOIN order_spice ON customer_order.Order_ID = order_spice.Order_ID
+LEFT JOIN accept_order ON customer_order.Order_ID = accept_order.Order_ID
+LEFT JOIN spice ON order_spice.Spice_ID = spice.Spice_ID
+WHERE customer_order.Accept_Status = 1
+GROUP BY customer_order.Order_ID;`;
+
+  db.query(sql, (err, data) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    console.log('Query result:', data);
+    return res.json({ orders: data });
   });
 });
 
+// Update payment status
+app.put('/approved_payments/:orderId', (req, res) => {
+  const orderId = req.params.orderId;
+  const paymentStatus = req.body.Payment_Status;
+
+  const sql = `UPDATE accept_order SET Payment_Status = ? WHERE Order_ID = ?`;
+
+  db.query(sql, [paymentStatus, orderId], (err, result) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    console.log('Payment status updated:', result);
+    return res.json({ message: 'Payment status updated' });
+  });
+});
+// spice availability
+app.get('/viewspice', (req, res) => {
+  const query = 'SELECT * FROM spice';
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching spices:', err);
+          return res.status(500).json({ error: 'Failed to fetch spice' });
+      }
+      res.status(200).json(results);
+  });
+});
+//--------------------------------------------deactivate spice
+
+app.put('/toggleProductStatus/:id/:status', (req, res) => {
+  const { id, status } = req.params;
+  console.log(`Attempting to toggle product status for product with ID: ${id}`);
+
+  // Define SQL query based on the status parameter
+  const sql = status === 'activate' 
+    ? 'UPDATE spice SET Active_Status = 1 WHERE Spice_ID = ?'
+    : 'UPDATE spice SET Active_Status = 0 WHERE Spice_ID = ?';
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('SQL Error:', err);
+      res.status(500).send({ error: 'Database query failed', details: err });
+    } else if (result.affectedRows === 0) {
+      console.warn(`Product with ID: ${id} not found`);
+      res.status(404).send({ error: 'Product not found' });
+    } else {
+      const action = status === 'activate' ? 'activated' : 'deactivated';
+      console.log(`Product with ID: ${id} ${action} successfully`);
+      res.send({ success: true });
+    }
+  });
+});
+
+
+
+app.put('/editspice/:id', (req, res) => {
+  const spiceId = req.params.id;
+  const editedSpice = req.body; // Assuming the edited spice data is sent in the request body
+  
+  // Prepare SQL query to update the spice with the given ID
+  const sql = `UPDATE spice SET Spice_Name = ?,  Buying_Price = ?, Selling_Price = ? WHERE Spice_ID = ?`;
+  const values = [editedSpice.Spice_Name, editedSpice.Buying_Price, editedSpice.Selling_Price, spiceId];
+  
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('SQL Error:', err);
+      res.status(500).send({ error: 'Database query failed', details: err });
+    } else if (result.affectedRows === 0) {
+      console.warn(`Spice with ID: ${spiceId} not found`);
+      res.status(404).send({ error: 'Spice not found' });
+    } else {
+      console.log(`Spice with ID: ${spiceId} updated successfully`);
+      res.status(200).send({ success: true });
+    }
+  });
+});
+
+
+app.post('/addspice', (req, res) => {
+  const newSpice = req.body; // Assuming the new spice data is sent in the request body
+  
+  // Prepare SQL query to insert the new spice into the database
+  const sql = 'INSERT INTO spice (Spice_Name, Buying_Price, Selling_Price) VALUES (?, ?, ?)';
+  const values = [newSpice.Spice_Name, newSpice.Buying_Price, newSpice.Selling_Price];
+  
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('SQL Error:', err);
+      res.status(500).send({ error: 'Database query failed', details: err });
+    } else {
+      console.log('New spice added successfully');
+      res.status(200).send({ success: true });
+    }
+  });
+});
 //-------------------------------------------------------------------------------------------------------
 
 app.listen(8081,()=>{

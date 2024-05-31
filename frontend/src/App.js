@@ -20,6 +20,10 @@ import SupRegister from './page/BranchManager/SupRegister';
 import CusRegister from './page/Admin/CusRegister';
 import ManagerRegister from './page/Admin/ManagerRegister';
 import AviewSupplier from './page/Admin/AviewSupplier';
+import SpaymentView from './page/Admin/SpaymentView';
+import CpaymentView from './page/Admin/CpaymentView';
+import Stock from './page/Admin/Stock';
+
 
 
 function App() {
@@ -46,6 +50,9 @@ function App() {
 <Route path='/ManagerRegister' element={<ManagerRegister/>}></Route>
 <Route path='/branchstock' element={<BranchStock/>}></Route>
 <Route path='/aviewsupplier' element={<AviewSupplier/>}></Route>
+<Route path='/spaymentview' element={<SpaymentView/>}></Route>
+<Route path='/cpaymentview' element={<CpaymentView/>}></Route>
+<Route path='/stock' element={<Stock/>}></Route>
 
 </Routes>
 

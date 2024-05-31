@@ -14,7 +14,7 @@ function CusRegister() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-  useEffect(() => {
+  useEffect(() => { 
     const fetchCustomers = async () => {
       try {
         const response = await axios.get('http://localhost:8081/customers');

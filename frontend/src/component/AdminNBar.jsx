@@ -15,10 +15,10 @@ function AdminNavbar() {
                         <NavDropdown.Item href="/CusRegister" style={{ color: 'black' }}>Customer</NavDropdown.Item>
                         <NavDropdown.Item href="/ManagerRegister" style={{ color: 'black' }}>Branch Manager</NavDropdown.Item>
                     </NavDropdown>
-                    <Nav.Link href="#supplier-payments" style={{ color: 'white' }}>Supplier Payments</Nav.Link>
-                    <Nav.Link href="#customer-payments" style={{ color: 'white' }}>Customer Payments</Nav.Link>
+                    <Nav.Link href="/spaymentview" style={{ color: 'white' }}>Supplier Payments</Nav.Link>
+                    <Nav.Link href="/cpaymentview" style={{ color: 'white' }}>Customer Payments</Nav.Link>
                     <Nav.Link href="#orders" style={{ color: 'white' }}>Orders</Nav.Link>
-                    <Nav.Link href="#availability" style={{ color: 'white' }}>Availability</Nav.Link>
+                    <Nav.Link href="/stock" style={{ color: 'white' }}>Spice Types</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>

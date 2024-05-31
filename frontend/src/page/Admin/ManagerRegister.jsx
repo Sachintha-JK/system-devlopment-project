@@ -1,148 +1,74 @@
-import React, { useState } from 'react';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import '../../css/Register.css';
+import AddManager from '../../component/AddManager';
 
 function ManagerRegister() {
-    
-    const [userName, setUserName] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
-    const [contactNumber, setContactNumber] = useState('');
-    const [branch, setBranch] = useState('');
-    const [email, setEmail] = useState('');
+  const [managers, setManagers] = useState([]);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-
-        // Form validation: Check if any field is blank
-        if (!userName || !password || !name || !email || !contactNumber || !branch) {
-            toast.error("Please fill in all fields."); // Display error notification
-            return; // Exit function if any field is blank
-        }
-
-
-        try {
-            // Send a POST request to create a new user
-            const userResponse = await axios.post('http://localhost:8081/user', {
-                User_Name: userName,
-                User_Type: 'Branch Manager',
-                Password: password,
-            });
-
-            // Extract the User_ID from the response
-            const userId = userResponse.data.User_ID;
-
-            // Send a POST request to create a new Branch Manager, with the retrieved User_ID
-            const branch_managerResponse = await axios.post('http://localhost:8081/branch_manager', {
-                Name: name,
-                Contact_Number: contactNumber,
-                Branch_Name: branch,
-                User_ID: userId,
-                Email: email
-            });
-
-            // Show success notification
-            toast.success("Branch Manager registered successfully!");
-
-            // Clear form fields
-            clearForm();
-        } catch (error) {
-            // Show error notification
-            toast.error("Error registering manager. Please try again.");
-            console.error('Error:', error.response.data);
-        }
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/viewbmanagers');
+        setManagers(response.data);
+      } catch (error) {
+        console.error('Error fetching managers:', error);
+        setError('Error fetching managers. Please try again later.');
+      }
     };
 
-    const clearForm = () => {
-        setUserName('');
-        setPassword('');
-        setName('');
-        setContactNumber('');
-        setBranch('');
-        setEmail('');
-    };
+    fetchManagers();
+  }, []);
 
-    return (
-        <div>
-            <br />
-            <div style={{ textAlign: 'center' }}>
-                <h1>Register-Branch Manager</h1>
-            </div>
-            <br />
-            <br />
-            <div className="sup-register-form-container">
-                <Form className="sup-register-form" onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3" id="formGridName">
-                        <Form.Label>Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter name with surname"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
-                    </Form.Group>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="formGridUserName">
-                            <Form.Label>UserName</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter UserName"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridPassword">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </Form.Group>
-                    </Row>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="formGridCnumberr">
-                            <Form.Label>Contact Number</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter the contact number"
-                                value={contactNumber}
-                            onChange={(e) => setContactNumber(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridemail">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter the Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </Form.Group>
-                    </Row>
-        
-                    <Form.Group className="mb-3" id="formGridName">
-                        <Form.Label>Branch</Form.Label>
-                        <Form.Control
-                            type="Text"
-                            placeholder="Enter the Branch Name"
-                            value={branch}
-                            onChange={(e) => setBranch(e.target.value)}
-                        />
-                    </Form.Group>
-                    <Button variant="primary" type="submit">
-                        Submit
-                    </Button>
-                </Form>
-            </div>
-            <ToastContainer />
-        </div>
-    );
+  const handleShowModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
+
+  return (
+    <div className="container mt-5">
+      <h2>Manager</h2>
+      {error && <p className="text-danger">{error}</p>}
+      <Button variant="primary" onClick={handleShowModal}>Add Manager</Button>
+      <table className="table table-striped mt-3">
+        <thead>
+          <tr>
+            <th>Manager_ID</th>
+            <th>Name</th>
+            <th>Contact_Number</th>
+            <th>Email</th>
+            <th>Branch_Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {managers.map(manager => (
+            <tr key={manager.Manager_ID}>
+              <td>{manager.Manager_ID}</td>
+              <td>{manager.Name}</td>
+              <td>{manager.Contact_Number}</td>
+              <td>{manager.Email}</td>
+              <td>{manager.Branch_Name}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Manager</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <AddManager />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
 }
 
 export default ManagerRegister;
