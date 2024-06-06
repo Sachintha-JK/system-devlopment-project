@@ -2,6 +2,7 @@ import React from 'react';
 import Chome from '../component/Chome';
 import Hnbar from '../component/Hnbar';
 import Desc from '../component/Desc';
+import Footer from '../component/Footer';
 
 
 
@@ -17,6 +18,7 @@ function Home() {
       </div>
       
       <div><Desc/></div>
+      <div><Footer/></div>
     </>
   );
 }

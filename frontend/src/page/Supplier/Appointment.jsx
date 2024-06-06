@@ -8,10 +8,11 @@ function Appointment() {
   const [supplierId, setSupplierId] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [showScheduledAppointments, setShowScheduledAppointments] = useState(false);
+  const [spiceTypes, setSpiceTypes] = useState([]);
   const [formData, setFormData] = useState({
     selecteddate: new Date().toISOString().split('T')[0], // Current date as default
     time: '',
-    description: ''
+    spices: [{ spiceId: '', quantity: '' }]
   });
 
   const handleCloseScheduledAppointments = () => setShowScheduledAppointments(false);
@@ -25,52 +26,88 @@ function Appointment() {
       }
       const user = JSON.parse(userJson);
       const userId = user.User_ID;
+      if (!userId) {
+        throw new Error('User ID not found in local storage');
+      }
+
       const response = await axios.get(`http://localhost:8081/supplier/${userId}`);
-      const supplierId = response.data.supplierId;
-      setSupplierId(supplierId);
+      if (response.status === 200) {
+        const supplierId = response.data.supplierId;
+        setSupplierId(supplierId);
+      } else {
+        throw new Error(`Failed to fetch supplierId: ${response.statusText}`);
+      }
     } catch (error) {
-      console.error('Error fetching supplierId:', error);
+      console.error('Error fetching supplierId:', error.message);
+    }
+  };
+
+  const fetchSpiceTypes = async () => {
+    try {
+      const response = await axios.get('http://localhost:8081/spice');
+      setSpiceTypes(response.data);
+    } catch (error) {
+      console.error('Error fetching spice types:', error.message);
     }
   };
 
   useEffect(() => {
     fetchSupplierId();
+    fetchSpiceTypes();
   }, []);
 
   const fetchSupplierAppointments = async () => {
+    if (!supplierId) return;
+
     try {
       const response = await axios.get(`http://localhost:8081/appointment/${supplierId}`);
       setAppointments(response.data.appointments);
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+      console.error('Error fetching appointments:', error.message);
     }
   };
 
   useEffect(() => {
-    if (supplierId) {
-      fetchSupplierAppointments();
-    }
+    fetchSupplierAppointments();
   }, [supplierId]);
+
+  const handleSpiceChange = (index, field, value) => {
+    const updatedSpices = [...formData.spices];
+    updatedSpices[index][field] = value;
+    setFormData({ ...formData, spices: updatedSpices });
+  };
+
+  const addSpiceField = () => {
+    setFormData({
+      ...formData,
+      spices: [...formData.spices, { spiceId: '', quantity: '' }]
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!supplierId) {
+      console.error('Supplier ID is not available');
+      return;
+    }
+
     try {
       await axios.post('http://localhost:8081/appointment', {
-        supplierId: supplierId,
+        supplierId,
         selecteddate: formData.selecteddate,
         time: formData.time,
-        description: formData.description
+        spices: formData.spices
       });
       // Reset form after successful submission
       setFormData({
         selecteddate: new Date().toISOString().split('T')[0],
         time: '',
-        description: ''
+        spices: [{ spiceId: '', quantity: '' }]
       });
       // Refetch appointments
       fetchSupplierAppointments();
     } catch (error) {
-      console.error('Error submitting appointment:', error);
+      console.error('Error submitting appointment:', error.message);
     }
   };
 
@@ -109,25 +146,39 @@ function Appointment() {
               required 
             />
           </Form.Group>
-          <Form.Group className="mb-3" controlId="formBasicDescription">
-            <Form.Label>Description</Form.Label>
-            <Form.Control 
-              as="textarea" 
-              rows={3} 
-              placeholder="Description about the appointment" 
-              value={formData.description} 
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
-              required 
-            />
+          <Form.Group className="mb-3" controlId="formBasicSpices">
+            <Form.Label>Spices</Form.Label>
+            {formData.spices.map((spice, index) => (
+              <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                <Form.Control 
+                  as="select" 
+                  value={spice.spiceId} 
+                  onChange={(e) => handleSpiceChange(index, 'spiceId', e.target.value)}
+                  style={{ marginRight: '10px' }}
+                  required
+                >
+                  <option value="">Select Spice</option>
+                  {spiceTypes.map((type) => (
+                    <option key={type.Spice_Id} value={type.Spice_Id}>{type.Spice_Name}</option>
+                  ))}
+                </Form.Control>
+                <Form.Control 
+                  type="text" 
+                  placeholder="Quantity" 
+                  value={spice.quantity} 
+                  onChange={(e) => handleSpiceChange(index, 'quantity', e.target.value)} 
+                  required 
+                />
+              </div>
+            ))}
+            <Button variant="secondary" onClick={addSpiceField}>Add Spice</Button>
           </Form.Group>
           <Button variant="primary" type="submit">
             Submit
           </Button>
         </Form>
       </div>
-      <Offcanvas show={showScheduledAppointments} 
-      onHide={handleCloseScheduledAppointments}
-      style={{ width: '80%' }} >
+      <Offcanvas show={showScheduledAppointments} onHide={handleCloseScheduledAppointments} style={{ width: '80%' }}>
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>My Scheduled Appointments</Offcanvas.Title>
         </Offcanvas.Header>
@@ -138,7 +189,7 @@ function Appointment() {
                 <th>Appointment ID</th>
                 <th>Date</th>
                 <th>Time</th>
-                <th>Comment</th>
+                <th>Spices</th>
                 <th>Approval</th>
               </tr>
             </thead>
@@ -148,7 +199,13 @@ function Appointment() {
                   <td>{appointment.Appointment_ID}</td>
                   <td>{moment(appointment.Selected_Date).format('MM/DD/YYYY')}</td>
                   <td>{appointment.Time}</td>
-                  <td>{appointment.Comment}</td>
+                  <td>
+                    {appointment.Spices.map((spice, index) => (
+                      <div key={index}>
+                        {spice.Spice_Name} - {spice.Quantity}
+                      </div>
+                    ))}
+                  </td>
                   <td>{appointment.Approval === 1 ? 'Approved' : appointment.Approval === 10 ? 'Pending' : appointment.Approval === 0 ? 'Declined' : ''}</td>
                 </tr>
               ))}

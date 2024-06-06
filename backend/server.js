@@ -5,10 +5,28 @@ import moment from 'moment';
 import authRoute from './routes/authRoute.js'
 import db from './config/db.js'
 
+import multer from 'multer';
+import path from 'path';
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './uploads'); // Destination folder for storing images
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // File name with current timestamp
+  }
+});
+
+const upload = multer({ storage: storage });
+
+
+
 const app= express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"))
+app.use("/uploads",express.static("uploads"))
+
 app.use('/auth', authRoute);
 /*const db= mysql.createConnection({
 
@@ -300,7 +318,7 @@ app.get('/find_branch_manager/:userId', (req, res) => {
 // ------view supplier(branch manager)
 app.get('/suppliers/:branchId', (req, res) => {
   const branchId = req.params.branchId;
-  const sql = "SELECT * FROM supplier WHERE Branch_ID = ? AND Active_Status = 1";
+  const sql = "SELECT * FROM supplier WHERE Active_Status = 1";
  
 
   db.query(sql, [branchId], (err, result) => {
@@ -316,7 +334,7 @@ app.get('/suppliers/:branchId', (req, res) => {
 });
 //************register supplier******************** */
 app.post('/suppliers', (req, res) => {
-  const { Name, Contact_Number, Address1, Address2, Branch_ID, User_Name, Password } = req.body;
+  const { Name, Contact_Number, Address1, Address2, Branch_ID, User_Name, Password, A_User_ID } = req.body;
 
   // Validate required fields
   if (!Name || !Contact_Number || !Address1 || !Branch_ID || !User_Name || !Password) {
@@ -342,8 +360,8 @@ app.post('/suppliers', (req, res) => {
       const User_ID = userResult.insertId;
 
       // Insert into supplier table
-      const supplierQuery = 'INSERT INTO supplier (Name, Contact_Number, Address1, Address2, Branch_ID, User_ID) VALUES (?, ?, ?, ?, ?, ?)';
-      db.query(supplierQuery, [Name, Contact_Number, Address1, Address2, Branch_ID, User_ID], (err, supplierResult) => {
+      const supplierQuery = 'INSERT INTO supplier (Name, Contact_Number, Address1, Address2, Branch_ID, User_ID, A_User_ID) VALUES (?, ?, ?, ?, ?, ?,?)';
+      db.query(supplierQuery, [Name, Contact_Number, Address1, Address2, Branch_ID, User_ID,A_User_ID], (err, supplierResult) => {
         if (err) {
           return db.rollback(() => {
             console.error('Error adding supplier to database:', err);
@@ -432,25 +450,23 @@ app.put('/deactivate_supplier/:id', (req, res) => {
 
 //*********get supply details(branch manager)********************* */
 
-app.get('/supply_details/:branchId', (req, res) => {
-  const branchId = req.params.branchId;
+app.get('/supply_details', (req, res) => {
   const sql = `
   SELECT
-  s.Supply_ID, s.Supplier_ID, s.Supply_Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status
-FROM
-  supply s
-INNER JOIN
-  supply_item si ON s.Supply_ID = si.Supply_ID
-INNER JOIN
-  supplier su ON s.Supplier_ID = su.Supplier_ID
-WHERE
-  su.Branch_ID = ?
-
-
-
+    s.Supply_ID, s.Supplier_ID, s.Supply_Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status,
+    su.Name AS Supplier_Name, su.Contact_Number, sp.Spice_Name AS Spice_Name,
+    s.A_User_ID, s.P_User_ID
+  FROM
+    supply s
+  INNER JOIN
+    supply_item si ON s.Supply_ID = si.Supply_ID
+  INNER JOIN
+    supplier su ON s.Supplier_ID = su.Supplier_ID
+  INNER JOIN
+    spice sp ON si.Spice_ID = sp.Spice_ID
   `;
 
-  db.query(sql, [branchId], (err, result) => {
+  db.query(sql, (err, result) => {
     if (err) {
       console.error("Error retrieving supply details:", err);
       return res.status(500).json({ error: "Internal Server Error", details: err });
@@ -459,14 +475,15 @@ WHERE
   });
 });
 
+
 //********************Update Payment sttus of supplier******************** */
 app.put('/update_payment_status/:supplyId', (req, res) => {
   const supplyId = parseInt(req.params.supplyId);
-  const { Payment_Status } = req.body;
+  const { Payment_Status, User_ID } = req.body;
 
-  const sql = `UPDATE supply SET Payment_Status = ? WHERE Supply_ID = ?`;
+  const sql = `UPDATE supply SET Payment_Status = ?, P_User_ID = ? WHERE Supply_ID = ?`;
 
-  db.query(sql, [Payment_Status, supplyId], (err, result) => {
+  db.query(sql, [Payment_Status, User_ID, supplyId], (err, result) => {
     if (err) {
       console.error("Error updating payment status:", err);
       return res.status(500).json({ error: "Internal Server Error", details: err });
@@ -479,6 +496,7 @@ app.put('/update_payment_status/:supplyId', (req, res) => {
     res.json({ success: true, message: 'Payment status updated successfully' });
   });
 });
+
  //*************reset supplier payment*********************** */ 
 
  app.put('/reset_payment_status/:supplyId', (req, res) => {
@@ -590,18 +608,26 @@ app.get('/appointment/:supplierId', (req, res) => {
 });
 //************************Place appointment* */
 app.post('/appointment', (req, res) => {
-  const { supplierId, selecteddate, time, description } = req.body;
+  const { supplierId, selecteddate, time, spices } = req.body;
   const currentDate = moment().format('YYYY-MM-DD'); // Get the current date in 'YYYY-MM-DD' format
+
+  // Create the description string from the spices array
+  const description = spices.map(spice => `${spice.spiceName}-${spice.quantity}`).join(', ');
 
   const sql = "INSERT INTO appointment (Supplier_ID, Date, Selected_Date, Time, Comment, Approval) VALUES (?, ?, ?, ?, ?, 10)"; // Assuming '10' is the default value for 'Approval'
 
-  db.query(sql, [supplierId, currentDate, selecteddate, time, description], (err, result) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-    return res.status(201).json({ message: "Appointment created successfully", appointmentId: result.insertId });
-  });
+  try {
+    db.query(sql, [supplierId, currentDate, selecteddate, time, description], (err, result) => {
+      if (err) {
+        console.error('Error executing query:', err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      return res.status(201).json({ message: "Appointment created successfully", appointmentId: result.insertId });
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 //********************************view supplies(branch manager)****************************** */
 app.get('/spice_quantities/:branchId', (req, res) => {
@@ -636,37 +662,20 @@ app.get('/spice_quantities/:branchId', (req, res) => {
 //*******************************Add supply */
 app.post('/add_supply', async (req, res) => {
   try {
-    console.log('Received supply data:', req.body); 
-    const { contactNumber, supplyItems, supplyValue } = req.body; // Include supplyValue
+    console.log('Received supply data:', req.body);
+    const { Supplier_ID, supplyItems, supplyValue, User_ID } = req.body;
     const Supply_Date = moment().format('YYYY-MM-DD');
 
     console.log('Supply Date:', Supply_Date);
-    console.log('Contact Number:', contactNumber); // Log the contact number
+    console.log('Supplier_ID:', Supplier_ID);
+    console.log('User_ID:', User_ID);
 
-    // Fetch Supplier_ID based on contact number
-    const supplierQuery = 'SELECT Supplier_ID FROM supplier WHERE Contact_Number = ?';
-    const supplierResult = await new Promise((resolve, reject) => {
-      db.query(supplierQuery, [contactNumber], (err, result) => {
-        if (err) {
-          console.error('Error fetching Supplier_ID:', err);
-          return reject(err);
-        }
-        if (result.length === 0) {
-          return reject(new Error('Supplier not found'));
-        }
-        resolve(result[0].Supplier_ID);
-      });
-    });
-
-    const Supplier_ID = supplierResult;
-    console.log('Fetched Supplier_ID:', Supplier_ID);
-
-    const insertSupplyQuery = 'INSERT INTO supply (Supplier_ID, Supply_Date, Payment) VALUES (?, ?, ?)';
+    const insertSupplyQuery = 'INSERT INTO supply (Supplier_ID, Supply_Date, Payment, A_User_ID) VALUES (?, ?, ?, ?)';
     const insertSupplyItemQuery = 'INSERT INTO supply_item (Supply_ID, Spice_ID, Quantity, Value) VALUES (?, ?, ?, ?)';
 
     // Insert into supply table
     const supplyResult = await new Promise((resolve, reject) => {
-      db.query(insertSupplyQuery, [Supplier_ID, Supply_Date, supplyValue], (err, result) => {
+      db.query(insertSupplyQuery, [Supplier_ID, Supply_Date, supplyValue, User_ID], (err, result) => {
         if (err) {
           console.error('Error inserting Supply:', err);
           return reject(err);
@@ -682,11 +691,12 @@ app.post('/add_supply', async (req, res) => {
     // Insert into supply_item table for each item in the supplyItems array
     const supplyItemPromises = supplyItems.map(item => {
       return new Promise((resolve, reject) => {
-        db.query(insertSupplyItemQuery, [Supply_ID, item.Spice_ID, item.Quantity, item.Value], (err) => {
+        db.query(insertSupplyItemQuery, [Supply_ID, item.Spice_ID, item.Quantity, item.Value], (err, result) => {
           if (err) {
             console.error('Error inserting supply item:', err);
             return reject(err);
           }
+          console.log(`Inserted supply item for Spice_ID ${item.Spice_ID}:`, result);
           resolve();
         });
       });
@@ -695,8 +705,8 @@ app.post('/add_supply', async (req, res) => {
     await Promise.all(supplyItemPromises);
     res.status(200).json({ message: 'Supply placed successfully!' });
   } catch (error) {
-    console.error('Error placing supply:', error);
-    res.status(500).json({ error: 'Failed to place supply' });
+    console.error('Error placing supply:', error.message, error.stack);
+    res.status(500).json({ error: 'Failed to place supply', details: error.message });
   }
 });
 
@@ -801,7 +811,7 @@ app.put('/activatecustomer/:id', (req, res) => {
     }
   }); 
 });
-//**************vuew managers(admin)************************** */
+//**************view managers(admin)************************** */
 app.get('/viewbmanagers', (req, res) => {
   const query = 'SELECT m.*, b.Branch_Name FROM branch_manager m INNER JOIN branch b ON m.Branch_ID = b.Branch_ID';
   db.query(query, (err, results) => {
@@ -882,6 +892,83 @@ app.put('/approved_payments/:orderId', (req, res) => {
     return res.json({ message: 'Payment status updated' });
   });
 });
+
+
+
+//*********************View Pending Orders */
+app.get('/pending_customer_orders', (req, res) => {
+  const sql = `SELECT customer_order.Order_ID, customer_order.Customer_ID, customer_order.Order_Date, customer_order.Deliver_Date, customer.Name, customer.Contact_Number,
+    GROUP_CONCAT(CONCAT_WS(' - ', spice.Spice_Name, order_spice.Quantity, order_spice.Value) SEPARATOR ',\n') as 'Product Details',
+    SUM(order_spice.Value) as 'Total Value'
+  FROM customer_order
+  INNER JOIN customer ON customer_order.Customer_ID = customer.Customer_ID
+  LEFT JOIN order_spice ON customer_order.Order_ID = order_spice.Order_ID
+  LEFT JOIN spice ON order_spice.Spice_ID = spice.Spice_ID
+  WHERE customer_order.Accept_Status = 10
+  GROUP BY customer_order.Order_ID;`;
+
+  db.query(sql, (err, data) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    console.log('Query result:', data);
+    return res.json({ orders: data });
+  });
+});
+//Approve or decline pending orders
+//************************************ */
+app.put("/Approval_orders/:orderId", (req, res) => {
+  const orderId = req.params.orderId;
+  const { Accept_Status } = req.body;
+
+  if (Accept_Status === undefined || Accept_Status === null) {
+    return res.status(400).json({ error: "Accept_Status is required" });
+  }
+
+  // Calculate the total payment for the order
+  const sqlGetPayment = `SELECT SUM(Value) AS TotalPayment FROM order_spice WHERE Order_ID = ?`;
+
+  db.query(sqlGetPayment, [orderId], (err, results) => {
+    if (err) {
+      console.error("Error calculating payment:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    const totalPayment = results[0].TotalPayment;
+
+    const sqlUpdateOrder = `UPDATE customer_order SET Accept_Status= ? WHERE Order_ID = ?`;
+
+    const updateOrder = () => {
+      db.query(sqlUpdateOrder, [Accept_Status, orderId], (err, result) => {
+        if (err) {
+          console.error("Error updating order:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+        console.log("Order updated:", result);
+        return res.json({ message: "Order updated successfully" });
+      });
+    };
+
+    if (Accept_Status === 1) {
+      // Insert a new record into the accept_order table
+      const sqlInsertApproved = `INSERT INTO accept_order (Order_ID, Payment) VALUES (?, ?)`;
+
+      db.query(sqlInsertApproved, [orderId, totalPayment], (err, result) => {
+        if (err) {
+          console.error("Error inserting into accept_order:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+        console.log("Record inserted into accept_order:", result);
+        updateOrder();
+      });
+    } else {
+      updateOrder();
+    }
+  });
+});
+
+
 // spice availability
 app.get('/viewspice', (req, res) => {
   const query = 'SELECT * FROM spice';
@@ -962,6 +1049,28 @@ app.post('/addspice', (req, res) => {
   });
 });
 
+//************************************************** */
+
+
+
+app.post('/adspice', upload.single('Image'), (req, res) => {
+  const newSpice = req.body; // Assuming the new spice data is sent in the request body
+  const imagePath = req.file.path; // Get the path of the uploaded image
+
+  // Prepare SQL query to insert the new spice into the database
+  const sql = 'INSERT INTO spice (Spice_Name, Buying_Price, Selling_Price, Image_Path) VALUES (?, ?, ?, ?)';
+  const values = [newSpice.Spice_Name, newSpice.Buying_Price, newSpice.Selling_Price, imagePath];
+  
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('SQL Error:', err);
+      res.status(500).send({ error: 'Database query failed', details: err });
+    } else {
+      console.log('New spice added successfully');
+      res.status(200).send({ success: true });
+    }
+  });
+});
 //**************************************calendar */
 app.get('/calendar_order', (req, res) => {
   const sql = `SELECT o.Order_ID, o.Deliver_Date, c.Company_Name, c.Name,
@@ -993,6 +1102,9 @@ GROUP BY o.Order_ID, o.Deliver_Date, c.Company_Name, c.Name`;
 // Fetch customer details by ID
 
 //-------------------------------------------------------------------------------------------------------
+
+
+
 
 app.listen(8081,()=>{
     console.log ("listening...")

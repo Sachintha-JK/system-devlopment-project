@@ -7,22 +7,27 @@ import { FaSearch } from 'react-icons/fa';
 
 function Hnbar() {
   return (
-    <div >
+    <div>
       <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
         <img src={BImage} alt="Your Image" style={{ height: '125px', width: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', top: '0', right: '0', padding: '10px', display: 'flex', alignItems: 'center' }}>
-          <FaSearch style={{ marginRight: '5px', color: 'white' }} /> {/* Render the search icon with white color */}
+          <FaSearch style={{ marginRight: '5px', color: 'white' }} />
           <input type="text" placeholder="Search..." style={{ padding: '5px', borderRadius: '5px', border: '1px solid #ccc' }} />
         </div>
       </div>
-     <Navbar style={{ backgroundColor: '#D2B48C' }} data-bs-theme="light">
+      <Navbar style={{ backgroundColor: '#dbcb82' }} data-bs-theme="light">
         <Container>
-        <Navbar.Brand style={{ fontSize: '1.5rem' }}>SpiceMart</Navbar.Brand>
+          <Navbar.Brand style={{ fontSize: '1.5rem' }}>SpiceMart</Navbar.Brand>
           <Nav className="me-auto">
-            
-            <Nav.Link href="login" style={{ fontSize: '1.2rem', fontWeight: 'bold'  }}>Login</Nav.Link>
-  
-           
+            <Nav.Link href="who" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000', transition: 'transform 0.3s' }} onMouseEnter={(e) => e.target.style.transform = 'translateY(-5px)'} onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}>
+              Who We Are
+            </Nav.Link>
+            <Nav.Link href="productchart" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000', transition: 'transform 0.3s' }} onMouseEnter={(e) => e.target.style.transform = 'translateY(-5px)'} onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}>
+              Our Products
+            </Nav.Link>
+            <Nav.Link href="login" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000', transition: 'transform 0.3s' }} onMouseEnter={(e) => e.target.style.transform = 'translateY(-5px)'} onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}>
+              Login
+            </Nav.Link>
           </Nav>
         </Container>
       </Navbar>

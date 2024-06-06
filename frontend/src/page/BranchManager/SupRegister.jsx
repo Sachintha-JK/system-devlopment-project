@@ -1,10 +1,9 @@
-// ViewSupplier.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Container, Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import AddSupplier from '../../component/AddSupplier'; // Adjust the import path as needed
 import EditSupplier from '../../component/EditSupplier'; // Import the EditSupplier component
+import BmNbar from '../../component/BmNbar';
 
 function ViewSupplier() {
   const [suppliers, setSuppliers] = useState([]);
@@ -15,6 +14,7 @@ function ViewSupplier() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [supplierToDelete, setSupplierToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userID, setUserID] = useState(null);
 
   useEffect(() => {
     const fetchBranchManagerAndSuppliers = async () => {
@@ -25,6 +25,7 @@ function ViewSupplier() {
         }
         const user = JSON.parse(userJson);
         const userId = user.User_ID;
+        setUserID(userId); // Set the userID state variable
 
         const response = await axios.get(`http://localhost:8081/find_branch_manager/${userId}`);
         setBranchManager(response.data);
@@ -65,7 +66,6 @@ function ViewSupplier() {
       // You may want to handle errors more gracefully, maybe display a message to the user
     }
   };
-  
 
   const confirmDeactivate = (supplier) => {
     setSupplierToDelete(supplier);
@@ -83,7 +83,9 @@ function ViewSupplier() {
 
   return (
     <div>
+       <div>  <BmNbar /></div>
       <Container className="mt-5">
+     
         <Row>
           <Col>
             <h1>Registered Suppliers</h1>
@@ -132,6 +134,7 @@ function ViewSupplier() {
           handleClose={() => setShowAddModal(false)}
           onSave={handleAddSupplier}
           branchId={branchManager.Branch_ID}
+          userID={userID} // Pass the userID prop
         />
       )}
       {selectedSupplier && (

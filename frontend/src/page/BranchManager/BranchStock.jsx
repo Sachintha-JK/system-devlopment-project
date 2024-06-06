@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Container } from 'react-bootstrap';
+import BmNbar from '../../component/BmNbar';
 
 function SpiceQuantities() {
   const [spiceQuantities, setSpiceQuantities] = useState([]);
@@ -42,6 +43,9 @@ function SpiceQuantities() {
   }, [branchId]);
 
   return (
+    <div>
+      <div>  <BmNbar /></div>
+   
     <Container className="mt-5">
       <h1>Spice Quantities</h1>
       <Table striped bordered hover>
@@ -49,7 +53,7 @@ function SpiceQuantities() {
           <tr>
             <th>Spice ID</th>
             <th>Spice Name</th>
-            <th>Total Quantity</th>
+            <th>Total Quantity(kg)</th>
           </tr>
         </thead>
         <tbody>
@@ -63,6 +67,7 @@ function SpiceQuantities() {
         </tbody>
       </Table>
     </Container>
+     </div>
   );
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form, Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { Form, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import axios from 'axios';
 import moment from 'moment';
 import { ToastContainer, toast } from 'react-toastify';
@@ -17,7 +17,7 @@ function CusPayment() {
         const response = await axios.get('http://localhost:8081/spices');
         setSpices(response.data);
       } catch (error) {
-        console.error('Error fetching Spices:', error);
+        console.error('Error fetching spices:', error);
       }
     };
 
@@ -50,6 +50,7 @@ function CusPayment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const supplyDate = moment().format('YYYY-MM-DD');
+    
     try {
       const response = await axios.get('http://localhost:8081/find_supplier', { params: { contact: contactNumber } });
       const supplierId = response.data.supplier.Supplier_ID;
@@ -64,12 +65,17 @@ function CusPayment() {
         };
       });
 
+      // Retrieve User_ID from local storage
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userId = user ? user.User_ID : null;
+
       const supplyData = {
         Supplier_ID: supplierId,
         Supply_Date: supplyDate,
         Contact_Number: contactNumber,
         supplyItems: supplyItems,
         supplyValue: supplyValue.toFixed(2),
+        User_ID: userId, // Include User_ID in the data sent to backend
       };
 
       console.log('Supply data:', supplyData);
@@ -101,6 +107,7 @@ function CusPayment() {
               placeholder="Enter Contact Number"
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
+              required
             />
           </Form.Group>
 
@@ -112,8 +119,9 @@ function CusPayment() {
                   name="spice"
                   value={field.spice}
                   onChange={(e) => handleFormChange(index, e)}
+                  required
                 >
-                  <option>Select the Spice</option>
+                  <option value="">Select the Spice</option>
                   {spices.map((spice) => (
                     <option key={spice.Spice_ID} value={spice.Spice_Name}>
                       {spice.Spice_Name}
@@ -130,6 +138,7 @@ function CusPayment() {
                   placeholder="Add the Quantity"
                   value={field.quantity}
                   onChange={(e) => handleFormChange(index, e)}
+                  required
                 />
               </Form.Group>
 

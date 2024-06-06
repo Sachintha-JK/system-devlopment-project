@@ -3,6 +3,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import AdminNBar from '../../component/AdminNBar'; // Adjust the path based on your directory structure
+import Footer from '../../component/Footer'; 
 
 function AdminHome() {
     return (
@@ -15,6 +16,7 @@ function AdminHome() {
                     {/* Your page content goes here */}
                 </Col>
             </Row>
+            <Footer />
         </Container>
     );
 }

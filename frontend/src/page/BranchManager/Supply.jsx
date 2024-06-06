@@ -1,49 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Container, Button, Modal } from 'react-bootstrap';
-
 import AddSupply from '../../component/AddSupply';
+import BmNbar from '../../component/BmNbar';
 
 function Supply() {
   const [supplyDetails, setSupplyDetails] = useState([]);
   const [spices, setSpices] = useState([]);
-  const [branchId, setBranchId] = useState(null);
   const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(false);
+  const [selectedSupplyId, setSelectedSupplyId] = useState(null);
 
   useEffect(() => {
-    const fetchBranchManager = async () => {
+    const fetchSupplyDetails = async () => {
       try {
-        const userJson = localStorage.getItem('user');
-        if (!userJson) {
-          throw new Error('User not found in local storage');
-        }
-        const user = JSON.parse(userJson);
-        const userId = user.User_ID;
-
-        const response = await axios.get(`http://localhost:8081/find_branch_manager/${userId}`);
-        setBranchId(response.data.Branch_ID);
+        const response = await axios.get(`http://localhost:8081/supply_details`);
+        setSupplyDetails(response.data);
       } catch (error) {
-        console.error('Error fetching branch manager:', error);
+        console.error('Error fetching supply details:', error);
       }
     };
 
-    fetchBranchManager();
+    fetchSupplyDetails();
   }, []);
-
-  useEffect(() => {
-    if (branchId) {
-      const fetchSupplyDetails = async () => {
-        try {
-          const response = await axios.get(`http://localhost:8081/supply_details/${branchId}`);
-          setSupplyDetails(response.data);
-        } catch (error) {
-          console.error('Error fetching supply details:', error);
-        }
-      };
-
-      fetchSupplyDetails();
-    }
-  }, [branchId]);
 
   useEffect(() => {
     const fetchSpices = async () => {
@@ -59,44 +38,43 @@ function Supply() {
   }, []);
 
   const handleCheckboxClick = async (index, supplyId) => {
+    setSelectedSupplyId(supplyId);
+    setConfirmationModal(true);
+  };
+
+  const handleConfirmPayment = async () => {
     const updatedSupplyDetails = [...supplyDetails];
+    const index = updatedSupplyDetails.findIndex(detail => detail.Supply_ID === selectedSupplyId);
     updatedSupplyDetails[index].Payment_Status = 1;
     updatedSupplyDetails[index].disabled = true;
     setSupplyDetails(updatedSupplyDetails);
 
     try {
-      await axios.put(`http://localhost:8081/update_payment_status/${supplyId}`, {
-        Payment_Status: 1 // Assuming 1 means paid
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userId = user ? user.User_ID : null;
+
+      await axios.put(`http://localhost:8081/update_payment_status/${selectedSupplyId}`, {
+        Payment_Status: 1,
+        User_ID: userId
       });
     } catch (error) {
       console.error('Error updating payment status:', error);
     }
+
+    setConfirmationModal(false);
   };
 
-  const handleEditClick = async (index, supplyId) => {
-    const updatedSupplyDetails = [...supplyDetails];
-    updatedSupplyDetails[index].Payment_Status = 0;
-    updatedSupplyDetails[index].disabled = false;
-    setSupplyDetails(updatedSupplyDetails);
-
-    try {
-      await axios.put(`http://localhost:8081/reset_payment_status/${supplyId}`);
-    } catch (error) {
-      console.error('Error resetting payment status:', error);
-    }
+  const handleCloseConfirmationModal = () => {
+    setConfirmationModal(false);
   };
 
   const handleDeleteClick = async (index, supplyId) => {
     try {
-      // Call backend route to delete supply
       await axios.delete(`http://localhost:8081/delete_supply/${supplyId}`);
-      
-      // Remove the supply detail from the frontend display
       const updatedSupplyDetails = supplyDetails.filter((_, i) => i !== index);
       setSupplyDetails(updatedSupplyDetails);
     } catch (error) {
       console.error('Error deleting supply:', error);
-      // Handle error, display error message, etc.
     }
   };
 
@@ -110,64 +88,72 @@ function Supply() {
 
   const handleAddSupply = (newSupply) => {
     setSupplyDetails([...supplyDetails, newSupply]);
-    setShowAddSupplyModal(false); // Close modal after adding supply
+    setShowAddSupplyModal(false);
+  };
+
+  const handleSupplyIdClick = (supplyId) => {
+    setSelectedSupplyId(supplyId === selectedSupplyId ? null : supplyId);
   };
 
   return (
+    <div>
+       <div>  <BmNbar /></div>
+   
     <Container className="mt-5">
-      <h1>Supply Details</h1>
+      
+      <h1>Spice Collection Details</h1>
       <Button variant="primary" onClick={handleAddSupplyClick} className="mb-3">
         Add Supply
       </Button>
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>Supply ID</th>
-            <th>Supplier ID</th>
+            <th>ID</th>
+            <th>Supplier Name</th>
+            <th>Contact Number</th>
             <th>Date</th>
             <th>Spice Name</th>
             <th>Quantity</th>
             <th>Value</th>
             <th>Payment</th>
             <th>Payment Status</th>
-            <th>Actions</th>
+           
           </tr>
         </thead>
         <tbody>
           {supplyDetails.map((detail, index) => (
-            <tr key={detail.Supply_ID}>
-              <td>{detail.Supply_ID}</td>
-              <td>{detail.Supplier_ID}</td>
-              <td>{new Date(detail.Supply_Date).toLocaleDateString()}</td>
-              <td>{spices.find(spice => spice.Spice_Id === detail.Spice_ID)?.Spice_Name}</td>
-              <td>{detail.Quantity}</td>
-              <td>{detail.Value}</td>
-              <td>{detail.Payment}</td>
-              <td>
-                <input
-                  type="checkbox"
-                  disabled={detail.disabled}
-                  checked={detail.Payment_Status === 1}
-                  onClick={() => handleCheckboxClick(index, detail.Supply_ID)}
-                />
-              </td>
-              <td>
-                <Button
-                  variant="warning"
-                  onClick={() => handleEditClick(index, detail.Supply_ID)}
-                  disabled={!detail.disabled}
-                  style={{ marginRight: '5px' }} // Add margin-right to create a gap
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => handleDeleteClick(index, detail.Supply_ID)}
-                >
-                  Delete
-                </Button>
-              </td>
-            </tr>
+            <React.Fragment key={detail.Supply_ID}>
+              <tr>
+                <td onClick={() => handleSupplyIdClick(detail.Supply_ID)} style={{ cursor: 'pointer' }}>
+                  {detail.Supply_ID}
+                </td>
+                <td>{detail.Supplier_Name}</td>
+                <td>{detail.Contact_Number}</td>
+                <td>{new Date(detail.Supply_Date).toLocaleDateString()}</td>
+                <td>{detail.Spice_Name}</td>
+                <td>{detail.Quantity}</td>
+                <td>{detail.Value}</td>
+                <td>{detail.Payment}</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    disabled={detail.disabled}
+                    checked={detail.Payment_Status === 1}
+                    onClick={() => handleCheckboxClick(index, detail.Supply_ID)}
+                  />
+                </td>
+               
+              </tr>
+              {selectedSupplyId === detail.Supply_ID && (
+                <tr>
+                  <td colSpan="10">
+                    <strong>Added By:</strong> {detail.A_User_ID}, 
+                    <br/>
+                    <strong>Paid By:</strong> {detail.P_User_ID}
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
           ))}
         </tbody>
       </Table>
@@ -181,7 +167,26 @@ function Supply() {
           <AddSupply onAddSupply={handleAddSupply} />
         </Modal.Body>
       </Modal>
+
+      {/* Confirmation Modal */}
+      <Modal show={confirmationModal} onHide={handleCloseConfirmationModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Payment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to mark this supply as paid?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseConfirmationModal}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleConfirmPayment}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
+    </div>
   );
 }
 

@@ -113,7 +113,6 @@ function CusRegister() {
               <thead>
                 <tr>
                   <th>Customer ID</th>
-                  <th>Name</th>
                   <th>Company Name</th>
                   <th>Contact Number</th>
                   <th>Email</th>
@@ -124,7 +123,6 @@ function CusRegister() {
                 {(searchTerm ? filteredCustomers : customers).map((customer) => (
                   <tr key={customer.Customer_ID}>
                     <td>{customer.Customer_ID}</td>
-                    <td>{customer.Name}</td>
                     <td>{customer.Company_Name}</td>
                     <td>{customer.Contact_Number}</td>
                     <td>{customer.Email}</td>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
 
-function AddSupplier({ show, handleClose, onSave, branchId }) {
+function AddSupplier({ show, handleClose, onSave, branchId, userID }) { // Include the userID prop
   const [name, setName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [address1, setAddress1] = useState('');
@@ -21,9 +21,10 @@ function AddSupplier({ show, handleClose, onSave, branchId }) {
         User_Name: userName,
         User_Type: 'Supplier', // User type is always 'Supplier'
         Password: password,
+        A_User_ID: userID, // Use the userID prop
       };
       console.log('New Supplier Data:', newSupplier); // Log new supplier data
-  
+
       const response = await axios.post('http://localhost:8081/suppliers', newSupplier);
       console.log('Supplier Save Response:', response.data); // Log response from backend
       onSave(response.data);
