@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, Container, Row, Col, Form } from 'react-bootstrap';
+import { Button, Container, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import AddCustomer from '../../component/AddCustomer';
 import EditCustomer from '../../component/EditCustomer';
 import axios from 'axios';
@@ -41,25 +41,24 @@ function CusRegister() {
   };
 
   const handleToggleStatus = async (customer) => {
-  const newStatus = customer.Active_Status === 1 ? 0 : 1;
-  const action = newStatus === 1 ? 'activate' : 'deactivate';
+    const newStatus = customer.Active_Status === 1 ? 0 : 1;
+    const action = newStatus === 1 ? 'activate' : 'deactivate';
 
-  try {
-    const response = await axios.put(`http://localhost:8081/${action}customer/${customer.Customer_ID}`, {
-      Active_Status: newStatus,
-    });
-    const updatedCustomer = response.data;
-    console.log("Updated customer:", updatedCustomer);
+    try {
+      const response = await axios.put(`http://localhost:8081/${action}customer/${customer.Customer_ID}`, {
+        Active_Status: newStatus,
+      });
+      const updatedCustomer = response.data;
+      console.log("Updated customer:", updatedCustomer);
 
-    // Update the local state with the updated customer
-    setCustomers(customers.map(c => c.Customer_ID === updatedCustomer.Customer_ID ? updatedCustomer : c));
-    filterCustomers(searchTerm); // Call the filterCustomers function
-  } catch (error) {
-    console.error(`Error ${action} customer:`, error);
+      // Update the local state with the updated customer
+      setCustomers(customers.map(c => c.Customer_ID === updatedCustomer.Customer_ID ? updatedCustomer : c));
+      filterCustomers(searchTerm); // Call the filterCustomers function
+    } catch (error) {
+      console.error(`Error ${action} customer:`, error);
+    }
   }
-}
 
-  
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
     filterCustomers(event.target.value);
@@ -78,88 +77,59 @@ function CusRegister() {
 
   return (
     <Container>
-      <Row className="mt-3">
-        <Col>
-          <h1>Customers</h1>
-        </Col>
-        <Col xs="auto">
-          <Button variant="primary" onClick={() => setShowPopup(true)}>
-            {showPopup ? 'Close' : 'Register Customer'}
-          </Button>
-        </Col>
-      </Row>
+      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Customers</h1>
 
-      <Row className="mt-3">
-        <Col>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Control
-                type="text"
-                placeholder="Search by Company Name"
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-            </Form.Group>
-          </Form>
-        </Col>
-      </Row>
+      <TextField
+  label="Search by Company Name"
+  size="small"
+  variant="outlined"
+  value={searchTerm}
+  onChange={handleSearchChange}
+  style={{ width: '100%', marginBottom: '10px' }}
+/>
+
 
       {error && <p className="text-danger">{error}</p>}
 
       {!loading && !error && (
-        <Row className="mt-3">
-          <Col>
-            <Table striped bordered hover>
-              <thead>
-                <tr>
-                  <th>Customer ID</th>
-                  <th>Company Name</th>
-                  <th>Contact Number</th>
-                  <th>Email</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(searchTerm ? filteredCustomers : customers).map((customer) => (
-                  <tr key={customer.Customer_ID}>
-                    <td>{customer.Customer_ID}</td>
-                    <td>{customer.Company_Name}</td>
-                    <td>{customer.Contact_Number}</td>
-                    <td>{customer.Email}</td>
-                    <td>
-                      <Button variant="info" className="mr-2" onClick={() => handleEdit(customer)}>
-                        Edit
-                      </Button>
-                      <Button
-  variant={customer.Active_Status === 1 ? "danger" : "success"}
-  style={{ marginLeft: '5px' }}
-  onClick={() => handleToggleStatus(customer)}
->
-  {customer.Active_Status === 1 ? "Deactivate" : "Activate"}
-</Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
+        <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Customer ID</TableCell>
+                <TableCell>Company Name</TableCell>
+                <TableCell>Contact Number</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(searchTerm ? filteredCustomers : customers).map((customer) => (
+                <TableRow key={customer.Customer_ID}>
+                  <TableCell>{customer.Customer_ID}</TableCell>
+                  <TableCell>{customer.Company_Name}</TableCell>
+                  <TableCell>{customer.Contact_Number}</TableCell>
+                  <TableCell>{customer.Email}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" color="primary" onClick={() => handleEdit(customer)}>Edit</Button>
+                    <Button
+                      variant={customer.Active_Status === 1 ? "contained" : "outlined"}
+                      color={customer.Active_Status === 1 ? "secondary" : "primary"}
+                      style={{ marginLeft: '5px' }}
+                      onClick={() => handleToggleStatus(customer)}
+                    >
+                      {customer.Active_Status === 1 ? "Deactivate" : "Activate"}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
-      {showPopup && (
-        <Row className="mt-3">
-          <Col>
-            <AddCustomer handleClose={handleClose} customers={customers} />
-          </Col>
-        </Row>
-      )}
-
-      {showEditModal && (
-        <EditCustomer
-          customer={selectedCustomer}
-          handleClose={handleCloseEditModal}
-        />
-      )}
+      {showPopup && <AddCustomer handleClose={handleClose} customers={customers} />}
+      {showEditModal && <EditCustomer customer={selectedCustomer} handleClose={handleCloseEditModal} />}
     </Container>
   );
 }

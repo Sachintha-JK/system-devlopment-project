@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Table } from 'react-bootstrap';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Table, TableContainer, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 import axios from 'axios';
 
 function SpicesList({ show, handleClose }) {
@@ -22,36 +22,36 @@ function SpicesList({ show, handleClose }) {
   }, [show]);
 
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Spices List</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Spice Name</th>
-              <th>Price</th>
-              <th>Stock (kg)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {spices.map((spice) => (
-              <tr key={spice.Spice_Name}>
-                <td>{spice.Spice_Name}</td>
-                <td>{spice.Selling_Price}</td>
-                <td>{spice.Stock}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+    <Dialog open={show} onClose={handleClose}>
+      <DialogTitle>Spices List</DialogTitle>
+      <DialogContent>
+        <TableContainer>
+          <Table aria-label="spices table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Spice Name</TableCell>
+                <TableCell>Price</TableCell>
+                <TableCell>Stock (kg)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {spices.map((spice) => (
+                <TableRow key={spice.Spice_Name}>
+                  <TableCell>{spice.Spice_Name}</TableCell>
+                  <TableCell>{spice.Selling_Price}</TableCell>
+                  <TableCell>{spice.Stock}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="secondary">
           Close
         </Button>
-      </Modal.Footer>
-    </Modal>
+      </DialogActions>
+    </Dialog>
   );
 }
 

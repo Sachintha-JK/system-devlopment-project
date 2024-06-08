@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button, TextField, Typography, Grid } from '@mui/material';
 import axios from 'axios';
 
 function EditCustomerForm({ customer, handleClose }) {
@@ -37,53 +37,55 @@ function EditCustomerForm({ customer, handleClose }) {
   };
 
   return (
-    <Modal show={true} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Edit Customer</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="formName">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter name with surname"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group controlId="formContactNumber">
-            <Form.Label>Contact Number</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter the contact number"
-              value={contactNumber}
-              onChange={(e) => setContactNumber(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group controlId="formEmail">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter the Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Form.Group>
-          <Form.Group controlId="formCompanyName">
-            <Form.Label>Company Name</Form.Label>
-            <Form.Control
-              type="Text"
-              placeholder="Enter the Company Name"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
-          </Form.Group>
-          <Button variant="primary" type="submit">
-            Save Changes
-          </Button>
-        </Form>
-      </Modal.Body>
+    <Modal open={true} onClose={handleClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '5px', width: '400px' }}>
+        <Typography variant="h5" gutterBottom>Edit Customer</Typography>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Name"
+                variant="outlined"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Contact Number"
+                variant="outlined"
+                value={contactNumber}
+                onChange={(e) => setContactNumber(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Email"
+                variant="outlined"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Company Name"
+                variant="outlined"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button variant="contained" color="primary" type="submit">
+                Save Changes
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      </div>
     </Modal>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import AccountNbar from '../../component/AccountNbar';
-import { Table } from 'react-bootstrap';
+import CustomerBar from '../../component/CustomerBar';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import axios from 'axios';
 import moment from 'moment';
 
@@ -46,58 +46,60 @@ function Cpayments() {
 
   return (
     <div>
-      <div><AccountNbar/></div>
+      <div><CustomerBar/></div>
+     
+      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
+        <Typography variant="h4" align="center">Payments</Typography>
+      </Paper>
+     
       <div style={{ marginLeft: '50px', padding: '20px', width: 'fit-content' }}>
-        <h1>Payments</h1>
-      </div>
-      <div style={{ marginLeft: '50px', padding: '20px', width: 'fit-content' }}>
-        <Table striped bordered hover>
-        <thead>
-  <tr>
-    <th>Order Number</th>
-    <th>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div>Spice Type</div>
-        <div>
-          <div>Quantity</div>
-          <div>(kg)</div>
-        </div>
-        <div>
-          <div>Value</div>
-          <div>(LKR)</div>
-        </div>
-      </div>
-    </th>
-    <th>Deliver Date</th>
-    <th>Total Value (LKR)</th>
-    <th>Payment Status</th>
-  
-  </tr>
-</thead>
-          <tbody>
-            {orders.map((customer_order) => (
-             <tr key={customer_order.Order_ID}>
-                <td>{customer_order.Order_ID}</td>
-                <td>
-        {customer_order.Spices.split(',').map((item, index) => {
-          const [name, qty, value] = item.split(' - ');
-          return (
-            <div key={index}>
-              <span style={{ display: 'inline-block', width: '200px' }}>{name}</span>
-              <span style={{ display: 'inline-block', width: '100px' }}>{qty}</span>
-              <span>{value}</span>
-            </div>
-          );
-        })}
-      </td>
-               <td>{moment(customer_order.Deliver_Date).format('MM/DD/YYYY')}</td>
-               <td>{customer_order.Payment}</td>
-                <td>{customer_order.Payment_Status === 0 ? 'Pending' : 'Paid'}</td>
-               
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Order Number</TableCell>
+                <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div>Spice Type</div>
+                    <div>
+                      <div>Quantity</div>
+                      <div>(kg)</div>
+                    </div>
+                    <div>
+                      <div>Value</div>
+                      <div>(LKR)</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Deliver Date</TableCell>
+                <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Total Value (LKR)</TableCell>
+                <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Payment Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {orders.map((customer_order) => (
+                <TableRow key={customer_order.Order_ID}>
+                  <TableCell>{customer_order.Order_ID}</TableCell>
+                  <TableCell>
+                    {customer_order.Spices.split(',').map((item, index) => {
+                      const [name, qty, value] = item.split(' - ');
+                      return (
+                        <div key={index}>
+                          <span style={{ display: 'inline-block', width: '200px' }}>{name}</span>
+                          <span style={{ display: 'inline-block', width: '100px' }}>{qty}</span>
+                          <span>{value}</span>
+                        </div>
+                      );
+                    })}
+                  </TableCell>
+                  <TableCell>{moment(customer_order.Deliver_Date).format('MM/DD/YYYY')}</TableCell>
+                  <TableCell>{customer_order.Payment}</TableCell>
+                  <TableCell>{customer_order.Payment_Status === 0 ? 'Pending' : 'Paid'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
     </div>
   );

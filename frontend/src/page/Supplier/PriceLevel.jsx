@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import AccountNbar from '../../component/AccountNbar';
-import Table from 'react-bootstrap/Table';
 import axios from 'axios';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+} from '@mui/material';
 
 function PriceLevel() {
   const [spices, setSpices] = useState([]);
@@ -18,32 +30,38 @@ function PriceLevel() {
 
   return (
     <div>
-      <div><AccountNbar/></div>
-
-      <div style={{ marginLeft: '50px', padding: '20px', width: 'fit-content' }}>
-        <h1>Price Levels</h1>
-      </div>
-
-      <div style={{ marginLeft: '50px', padding: '20px', width: 'fit-content' }}>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-            <th>Spice ID</th>
-              <th>Spice Type</th>
-              <th>Price for l kg(Rs)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {spices.map(spice => (
-              <tr key={spice.Spice_ID}>
-                <td>{spice.Spice_ID}</td>
-                <td>{spice.Spice_Name}</td>
-                <td>{spice.Buying_Price}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
+      <AccountNbar />
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+        <Card sx={{ width: '50%', boxShadow: 3 }}>
+          <CardContent>
+            <Typography variant="h4" gutterBottom>
+              Price Levels
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <TableContainer component={Paper} sx={{ width: '90%' }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Spice ID</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Spice Type</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Price for 1 kg (Rs)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {spices.map(spice => (
+                <TableRow key={spice.Spice_ID}>
+                  <TableCell>{spice.Spice_ID}</TableCell>
+                  <TableCell>{spice.Spice_Name}</TableCell>
+                  <TableCell>{spice.Buying_Price}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     </div>
   );
 }

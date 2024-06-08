@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Button, Container, TextField, Grid, Select, MenuItem, Typography, Card, CardContent } from '@mui/material';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -91,80 +91,82 @@ function ManagerRegister() {
     };
 
     return (
-        <div>
-            <div className="sup-register-form-container">
-                <Form className="sup-register-form" onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3" id="formGridName">
-                        <Form.Label>Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter name with surname"
+        <Container>
+            <Card variant="outlined" style={{ marginBottom: '10px' }}>
+                <CardContent>
+                    <Typography variant="h4" component="h2" gutterBottom>
+                        Manager Registration
+                    </Typography>
+                </CardContent>
+            </Card>
+
+            <div>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="Name"
+                            fullWidth
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
-                    </Form.Group>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="formGridUserName">
-                            <Form.Label>UserName</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter UserName"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridPassword">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </Form.Group>
-                    </Row>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="formGridCnumber">
-                            <Form.Label>Contact Number</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter the contact number"
-                                value={contactNumber}
-                                onChange={(e) => setContactNumber(e.target.value)}
-                            />
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="formGridEmail">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter the Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </Form.Group>
-                    </Row>
-                    <Form.Group className="mb-3" id="formGridBranch">
-                        <Form.Label>Branch</Form.Label>
-                        <Form.Control
-                            as="select"
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="UserName"
+                            fullWidth
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="Password"
+                            fullWidth
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="Contact Number"
+                            fullWidth
+                            value={contactNumber}
+                            onChange={(e) => setContactNumber(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="Email"
+                            fullWidth
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Select
+                            label="Branch"
+                            fullWidth
                             value={branchId}
                             onChange={(e) => setBranchId(e.target.value)}
                         >
-                            <option value="">Select Branch</option>
+                            <MenuItem value="">Select Branch</MenuItem>
                             {branches.map(branch => (
-                                <option key={branch.Branch_ID} value={branch.Branch_ID}>
+                                <MenuItem key={branch.Branch_ID} value={branch.Branch_ID}>
                                     {branch.Branch_Name}
-                                </option>
+                                </MenuItem>
                             ))}
-                        </Form.Control>
-                    </Form.Group>
-                    <Button variant="primary" type="submit">
-                        Submit
-                    </Button>
-                </Form>
+                        </Select>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button variant="contained" color="primary" onClick={handleSubmit}>
+                            Submit
+                        </Button>
+                    </Grid>
+                </Grid>
             </div>
             <ToastContainer />
-        </div>
+        </Container>
     );
 }
 

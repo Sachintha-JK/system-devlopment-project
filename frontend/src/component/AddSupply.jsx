@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FormControl, InputLabel, Select, MenuItem, TextField, Button, Tooltip } from '@mui/material';
 import axios from 'axios';
 import moment from 'moment';
 import { ToastContainer, toast } from 'react-toastify';
@@ -91,7 +91,7 @@ function CusPayment() {
   };
 
   return (
-    <div>
+    <div style={{ backgroundColor: 'white', padding: '20px' }}>
       <br />
       <br />
       <div style={{ textAlign: 'center' }}>
@@ -99,66 +99,65 @@ function CusPayment() {
       </div>
 
       <div style={{ margin: 'auto', border: '1px solid black', padding: '20px', width: 'fit-content', fontSize: '20px' }}>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="formContactNumber">
-            <Form.Label>Contact Number</Form.Label>
-            <Form.Control
+        <form onSubmit={handleSubmit}>
+          <FormControl fullWidth sx={{ marginBottom: '20px' }}>
+            <InputLabel id="contact-number-label">Contact Number</InputLabel>
+            <TextField
+              id="contact-number"
               type="text"
-              placeholder="Enter Contact Number"
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
               required
             />
-          </Form.Group>
+          </FormControl>
 
           {formFields.map((field, index) => (
             <div key={index} className="d-flex flex-row align-items-center mb-3">
-              <Form.Group className="flex-fill" controlId={`formBasicType${index}`}>
-                <Form.Label>Spice Type</Form.Label>
-                <Form.Select
+              <FormControl className="flex-fill me-3" fullWidth>
+                <InputLabel id={`spice-type-label-${index}`}>Spice Type</InputLabel>
+                <Select
+                  labelId={`spice-type-label-${index}`}
+                  id={`spice-type-${index}`}
                   name="spice"
                   value={field.spice}
                   onChange={(e) => handleFormChange(index, e)}
                   required
                 >
-                  <option value="">Select the Spice</option>
+                  <MenuItem value="">Select the Spice</MenuItem>
                   {spices.map((spice) => (
-                    <option key={spice.Spice_ID} value={spice.Spice_Name}>
+                    <MenuItem key={spice.Spice_ID} value={spice.Spice_Name}>
                       {spice.Spice_Name}
-                    </option>
+                    </MenuItem>
                   ))}
-                </Form.Select>
-              </Form.Group>
+                </Select>
+              </FormControl>
 
-              <Form.Group className="flex-fill ms-3" controlId={`formBasicTime${index}`}>
-                <Form.Label>Quantity</Form.Label>
-                <Form.Control
+              <FormControl className="flex-fill me-3" fullWidth>
+                <InputLabel id={`quantity-label-${index}`}>Quantity</InputLabel>
+                <TextField
+                  id={`quantity-${index}`}
                   type="number"
                   name="quantity"
-                  placeholder="Add the Quantity"
                   value={field.quantity}
                   onChange={(e) => handleFormChange(index, e)}
                   required
                 />
-              </Form.Group>
+              </FormControl>
 
               {index === formFields.length - 1 && (
-                <Button variant="secondary" onClick={addFormField} className="ms-2" title="Add more Spice Types">
+                <Button variant="outlined" onClick={addFormField} className="ms-2" title="Add more Spice Types">
                   +
                 </Button>
               )}
             </div>
           ))}
 
-          <OverlayTrigger
-            placement="top"
-            overlay={<Tooltip id="tooltip-submit">Submit your supply</Tooltip>}
-          >
-            <Button variant="primary" type="submit" className="submit-button" style={{ backgroundColor: '#1F618D', textAlign: 'center' }}>
+          <Tooltip title="Submit your supply">
+            <Button variant="contained" type="submit" style={{ backgroundColor: '#1F618D', color: 'white', textAlign: 'center' }}>
               Submit
             </Button>
-          </OverlayTrigger>
-        </Form>
+          </Tooltip>
+        </form>
 
         <div style={{ marginTop: '20px' }}>
           <h3>Supply Value: Rs {supplyValue.toFixed(2)}</h3>

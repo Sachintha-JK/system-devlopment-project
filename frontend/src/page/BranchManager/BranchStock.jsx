@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Container } from 'react-bootstrap';
+import { Container, Card, CardContent, Typography, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
 import BmNbar from '../../component/BmNbar';
 
 function SpiceQuantities() {
@@ -44,30 +44,35 @@ function SpiceQuantities() {
 
   return (
     <div>
-      <div>  <BmNbar /></div>
-   
-    <Container className="mt-5">
-      <h1>Spice Quantities</h1>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Spice ID</th>
-            <th>Spice Name</th>
-            <th>Total Quantity(kg)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {spiceQuantities.map((spice) => (
-            <tr key={spice.Spice_ID}>
-              <td>{spice.Spice_ID}</td>
-              <td>{spice.Spice_Name}</td>
-              <td>{spice.Total_Quantity}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </Container>
-     </div>
+      <BmNbar />
+      <Container sx={{ marginTop: 3 }}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" align="center" gutterBottom>Spice Quantities</Typography>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650, fontSize: 16 }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center"><strong>Spice ID</strong></TableCell>
+                    <TableCell align="center"><strong>Spice Name</strong></TableCell>
+                    <TableCell align="center"><strong>Total Quantity (kg)</strong></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {spiceQuantities.map((spice) => (
+                    <TableRow key={spice.Spice_ID}>
+                      <TableCell align="center">{spice.Spice_ID}</TableCell>
+                      <TableCell align="center">{spice.Spice_Name}</TableCell>
+                      <TableCell align="center">{spice.Total_Quantity}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      </Container>
+    </div>
   );
 }
 

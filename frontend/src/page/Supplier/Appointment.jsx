@@ -1,8 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import AccountNbar from '../../component/AccountNbar';
-import { Button, Form, Table, Offcanvas } from 'react-bootstrap';
-import moment from 'moment';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import AccountNbar from "../../component/AccountNbar";
+import {
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Box,
+  Container,
+  Paper,
+  Typography,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Drawer,
+} from "@mui/material";
+import { Add as AddIcon, Close as CloseIcon } from "@mui/icons-material";
+import moment from "moment";
 
 function Appointment() {
   const [supplierId, setSupplierId] = useState(null);
@@ -10,27 +30,82 @@ function Appointment() {
   const [showScheduledAppointments, setShowScheduledAppointments] = useState(false);
   const [spiceTypes, setSpiceTypes] = useState([]);
   const [formData, setFormData] = useState({
-    selecteddate: new Date().toISOString().split('T')[0], // Current date as default
-    time: '',
-    spices: [{ spiceId: '', quantity: '' }]
+    selecteddate: new Date().toISOString().split("T")[0], // Current date as default
+    time: "",
+    spices: [{ spiceId: "", spiceName: "", quantity: "" }],
   });
+  const [timeslots, settimeslots] = useState([]);
+
+  useEffect(() => {
+    // Fetch appointments for the selected date
+    console.log(formData.selecteddate);
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8081/checktime/${formData.selecteddate}`
+        );
+        settimeslots(response.data);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+      }
+    };
+
+    fetchAppointments();
+  }, [formData.selecteddate]);
+
+  const convertTo12HourFormat = (time) => {
+    const [hour, minute] = time.split(":");
+    const h = parseInt(hour, 10);
+    const ampm = h >= 12 ? "PM" : "AM";
+    const hours = h % 12 || 12;
+    return `${hours}:${minute} ${ampm}`;
+  };
+
+  const generateTimeOptions = () => {
+    const options = [];
+    let start = 8 * 60; // 8:00 AM in minutes
+    const end = 17 * 60; // 5:00 PM in minutes
+    console.log(timeslots);
+    const bookedTimes = timeslots.map((timeslot) =>
+      convertTo12HourFormat(timeslot.time)
+    );
+    console.log(bookedTimes);
+
+    while (start <= end) {
+      const hours = Math.floor(start / 60);
+      const minutes = start % 60;
+      const time = `${hours % 12 || 12}:${minutes
+        .toString()
+        .padStart(2, "0")} ${hours < 12 ? "AM" : "PM"}`;
+      const isDisabled = bookedTimes.includes(time);
+      options.push(
+        <MenuItem key={start} value={time} disabled={isDisabled}>
+          {time}
+        </MenuItem>
+      );
+      start += 15;
+    }
+    return options;
+  };
 
   const handleCloseScheduledAppointments = () => setShowScheduledAppointments(false);
   const handleShowScheduledAppointments = () => setShowScheduledAppointments(true);
 
   const fetchSupplierId = async () => {
     try {
-      const userJson = localStorage.getItem('user');
+      const userJson = localStorage.getItem("user");
       if (!userJson) {
-        throw new Error('User not found in local storage');
+        throw new Error("User not found in local storage");
       }
       const user = JSON.parse(userJson);
       const userId = user.User_ID;
       if (!userId) {
-        throw new Error('User ID not found in local storage');
+        throw new Error("User ID not found in local storage");
       }
 
-      const response = await axios.get(`http://localhost:8081/supplier/${userId}`);
+      const response = await axios.get(
+        `http://localhost:8081/supplier/${userId}`
+      );
       if (response.status === 200) {
         const supplierId = response.data.supplierId;
         setSupplierId(supplierId);
@@ -38,16 +113,16 @@ function Appointment() {
         throw new Error(`Failed to fetch supplierId: ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error fetching supplierId:', error.message);
+      console.error("Error fetching supplierId:", error.message);
     }
   };
 
   const fetchSpiceTypes = async () => {
     try {
-      const response = await axios.get('http://localhost:8081/spice');
+      const response = await axios.get("http://localhost:8081/spice");
       setSpiceTypes(response.data);
     } catch (error) {
-      console.error('Error fetching spice types:', error.message);
+      console.error("Error fetching spice types:", error.message);
     }
   };
 
@@ -60,10 +135,12 @@ function Appointment() {
     if (!supplierId) return;
 
     try {
-      const response = await axios.get(`http://localhost:8081/appointment/${supplierId}`);
+      const response = await axios.get(
+        `http://localhost:8081/appointment/${supplierId}`
+      );
       setAppointments(response.data.appointments);
     } catch (error) {
-      console.error('Error fetching appointments:', error.message);
+      console.error("Error fetching appointments:", error.message);
     }
   };
 
@@ -73,147 +150,231 @@ function Appointment() {
 
   const handleSpiceChange = (index, field, value) => {
     const updatedSpices = [...formData.spices];
-    updatedSpices[index][field] = value;
+    if (field === "spiceId") {
+      const selectedSpice = spiceTypes.find(
+        (spice) => spice.Spice_Id === value
+      );
+      updatedSpices[index] = {
+        ...updatedSpices[index],
+        spiceId: value,
+        spiceName: selectedSpice ? selectedSpice.Spice_Name : "",
+      };
+    } else {
+      updatedSpices[index][field] = value;
+    }
+    console.log("Updated Spices:", updatedSpices);
     setFormData({ ...formData, spices: updatedSpices });
   };
 
   const addSpiceField = () => {
     setFormData({
       ...formData,
-      spices: [...formData.spices, { spiceId: '', quantity: '' }]
+      spices: [
+        ...formData.spices,
+        { spiceId: "", spiceName: "", quantity: "" },
+      ],
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!supplierId) {
-      console.error('Supplier ID is not available');
+      console.error("Supplier ID is not available");
       return;
     }
+    const description = formData.spices
+      .map((spice) => `${spice.spiceName || "undefined"}-${spice.quantity}`)
+      .join(", ");
 
     try {
-      await axios.post('http://localhost:8081/appointment', {
+      await axios.post("http://localhost:8081/appointment", {
         supplierId,
         selecteddate: formData.selecteddate,
         time: formData.time,
-        spices: formData.spices
+        spices: formData.spices,
+        description,
       });
       // Reset form after successful submission
       setFormData({
-        selecteddate: new Date().toISOString().split('T')[0],
-        time: '',
-        spices: [{ spiceId: '', quantity: '' }]
+        selecteddate: new Date().toISOString().split("T")[0],
+        time: "",
+        spices: [{ spiceId: "", spiceName: "", quantity: "" }],
       });
       // Refetch appointments
       fetchSupplierAppointments();
     } catch (error) {
-      console.error('Error submitting appointment:', error.message);
+      console.error("Error submitting appointment:", error.message);
     }
   };
 
   return (
-    <div>
+    <Container>
       <AccountNbar />
-      <div style={{ marginLeft: '50px', padding: '20px', width: 'fit-content' }}>
-        <h1>Appointments</h1>
-      </div>
-      <div style={{ display: 'inline-block' }}>
-        <Button variant="success" onClick={handleShowScheduledAppointments} style={{ marginLeft: '60px' }}>
-          My Scheduled Appointments
-        </Button>
-      </div>
-      <br />
-      <br />
-      <div style={{ marginLeft: '60px', border: '1px solid black', padding: '20px', width: '400px' }}>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3" controlId="formBasicDate">
-            <Form.Label>Date</Form.Label>
-            <Form.Control 
-              type="date" 
-              placeholder="Select the Date" 
-              value={formData.selecteddate} 
-              onChange={(e) => setFormData({ ...formData, selecteddate: e.target.value })} 
-              required 
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="formBasicTime">
-            <Form.Label>Time</Form.Label>
-            <Form.Control 
-              type="time" 
-              placeholder="Select the Time" 
-              value={formData.time} 
-              onChange={(e) => setFormData({ ...formData, time: e.target.value })} 
-              required 
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="formBasicSpices">
-            <Form.Label>Spices</Form.Label>
-            {formData.spices.map((spice, index) => (
-              <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                <Form.Control 
-                  as="select" 
-                  value={spice.spiceId} 
-                  onChange={(e) => handleSpiceChange(index, 'spiceId', e.target.value)}
-                  style={{ marginRight: '10px' }}
-                  required
-                >
-                  <option value="">Select Spice</option>
-                  {spiceTypes.map((type) => (
-                    <option key={type.Spice_Id} value={type.Spice_Id}>{type.Spice_Name}</option>
-                  ))}
-                </Form.Control>
-                <Form.Control 
-                  type="text" 
-                  placeholder="Quantity" 
-                  value={spice.quantity} 
-                  onChange={(e) => handleSpiceChange(index, 'quantity', e.target.value)} 
-                  required 
-                />
-              </div>
-            ))}
-            <Button variant="secondary" onClick={addSpiceField}>Add Spice</Button>
-          </Form.Group>
-          <Button variant="primary" type="submit">
-            Submit
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          mt: 5,
+        }}
+      >
+        <Typography variant="h4" gutterBottom>
+          Appointments
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleShowScheduledAppointments}
+          >
+            My Scheduled Appointments
           </Button>
-        </Form>
-      </div>
-      <Offcanvas show={showScheduledAppointments} onHide={handleCloseScheduledAppointments} style={{ width: '80%' }}>
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>My Scheduled Appointments</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Appointment ID</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Spices</th>
-                <th>Approval</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments.map((appointment) => (
-                <tr key={appointment.Appointment_ID}>
-                  <td>{appointment.Appointment_ID}</td>
-                  <td>{moment(appointment.Selected_Date).format('MM/DD/YYYY')}</td>
-                  <td>{appointment.Time}</td>
-                  <td>
-                    {appointment.Spices.map((spice, index) => (
-                      <div key={index}>
-                        {spice.Spice_Name} - {spice.Quantity}
-                      </div>
+        </Box>
+        <Paper
+          elevation={3}
+          sx={{ p: 4, width: 400, display: "flex", flexDirection: "column" }}
+        >
+          <form onSubmit={handleSubmit}>
+            <FormControl fullWidth margin="normal">
+              <TextField
+                label="Date"
+                type="date"
+                value={formData.selecteddate}
+                onChange={(e) =>
+                  setFormData({ ...formData, selecteddate: e.target.value })
+                }
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                required
+              />
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="time-label">Time</InputLabel>
+              <Select
+                labelId="time-label"
+                value={formData.time}
+                onChange={(e) =>
+                  setFormData({ ...formData, time: e.target.value })
+                }
+                label="Time"
+                required
+              >
+                <MenuItem value="">Select the Time</MenuItem>
+                {generateTimeOptions()}
+              </Select>
+            </FormControl>
+            {formData.spices.map((spice, index) => (
+              <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
+                <FormControl fullWidth margin="normal" sx={{ mr: 1 }}>
+                  <InputLabel id={`spice-label-${index}`}>Spice</InputLabel>
+                  <Select
+                    labelId={`spice-label-${index}`}
+                    value={spice.spiceId}
+                    onChange={(e) =>
+                      handleSpiceChange(index, "spiceId", e.target.value)
+                    }
+                    label="Spice"
+                    required
+                  >
+                    <MenuItem value="">Select Spice</MenuItem>
+                    {spiceTypes.map((type) => (
+                      <MenuItem key={type.Spice_Id} value={type.Spice_Id}>
+                        {type.Spice_Name}
+                      </MenuItem>
                     ))}
-                  </td>
-                  <td>{appointment.Approval === 1 ? 'Approved' : appointment.Approval === 10 ? 'Pending' : appointment.Approval === 0 ? 'Declined' : ''}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Offcanvas.Body>
-      </Offcanvas>
-    </div>
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="Quantity"
+                  value={spice.quantity}
+                  onChange={(e) =>
+                    handleSpiceChange(index, "quantity", e.target.value)
+                  }
+                  required
+                />
+              </Box>
+            ))}
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <Button
+                variant="contained"
+                onClick={addSpiceField}
+                startIcon={<AddIcon />}
+                sx={{
+                  backgroundColor: "green", // Set background color to green
+                  '&:hover': {
+                    backgroundColor: "#388e3c", // Darker green on hover
+                  },
+                }}
+              >
+                Add Spice
+              </Button>
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <Button type="submit" variant="contained">
+                Submit
+              </Button>
+            </Box>
+          </form>
+        </Paper>
+      </Box>
+      <Drawer
+        anchor="right"
+        open={showScheduledAppointments}
+        onClose={handleCloseScheduledAppointments}
+      >
+        <Box sx={{ width: 400, p: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography variant="h6">My Scheduled Appointments</Typography>
+            <IconButton onClick={handleCloseScheduledAppointments}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Appointment ID</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Time</TableCell>
+                  <TableCell>Spices</TableCell>
+                  <TableCell>Approval</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {appointments.map((appointment) => (
+                  <TableRow key={appointment.Appointment_ID}>
+                    <TableCell>{appointment.Appointment_ID}</TableCell>
+                    <TableCell>
+                      {moment(appointment.Selected_Date).format("MM/DD/YYYY")}
+                    </TableCell>
+                    <TableCell>{appointment.Time}</TableCell>
+                    <TableCell>
+                      {appointment.Spices
+                        ? appointment.Spices.map((spice, index) => (
+                            <div key={index}>
+                              {spice.Spice_Name} - {spice.Quantity}
+                            </div>
+                          ))
+                        : "No spices"}
+                    </TableCell>
+                    <TableCell>
+                      {appointment.Approval === 1
+                        ? "Approved"
+                        : appointment.Approval === 10
+                        ? "Pending"
+                        : appointment.Approval === 0
+                        ? "Declined"
+                        : ""}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </Drawer>
+    </Container>
   );
 }
 

@@ -1,54 +1,66 @@
-import React from 'react';
-import {Button, Container,Card,Row,Col} from 'react-bootstrap';
-import c1Image from '../../assets/c1.png'; 
-import AccountNbar from '../../component/AccountNbar';
+import React, { useEffect, useState } from 'react';
+import CustomerBar from '../../component/CustomerBar';
+import Footer from '../../component/Footer';
 import { useNavigate } from 'react-router-dom';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 
 function CusHome() {
-  const Navigate= useNavigate();
+  const navigate = useNavigate();
+  const [spices, setSpices] = useState([]);
+  const [expandedSpice, setExpandedSpice] = useState(null);
+
+  useEffect(() => {
+    // Fetch spice data from the backend when the component mounts
+    fetch('http://localhost:8081/spices')
+      .then(response => response.json())
+      .then(data => setSpices(data))
+      .catch(error => console.error('Error fetching spices:', error));
+  }, []);
+
+  const handleLearnMoreClick = (spiceName) => {
+    setExpandedSpice(spiceName === expandedSpice ? null : spiceName);
+  };
+
   return (
     <>
-       <div><AccountNbar/></div>
-
-<br></br>
-<br></br>
-      <div className="d-flex justify-content-around">
-        <Container>
-          <Row>
-
-
-            <Col xs={6} md={4}>
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={c1Image} />
-                <Card.Body>
-                  <Card.Title>Payments</Card.Title>
-                  <Card.Text>
-                  Track your payment history and stay on top of your transactions for easy financial management.
-                  </Card.Text>
-                  <Button onClick ={()=> Navigate("/cpayments")} variant="primary">View Details</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            <Col xs={6} md={4}>
-              <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={c1Image} />
-                <Card.Body>
-                  <Card.Title>Orders</Card.Title>
-                  <Card.Text>
-                  Effortlessly place orders for your favorite spices with just a few clicks.
-                  <br></br>
-                  <br></br>
-                  </Card.Text>
-                  <Button onClick ={()=> Navigate("/orders")} variant="primary">View Details</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
+      <CustomerBar />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', margin: '40px' }}>
+        {spices.map(spice => (
+          <Card key={spice.Spice_Name} sx={{ maxWidth: 345 }}>
+            <CardMedia
+              sx={{ height: 140 }}
+              image={`http://localhost:8081/${spice.Image_Path}`}
+              title={spice.Spice_Name}
+            />
+            <CardContent>
+              <Typography gutterBottom variant="h5" component="div">
+                {spice.Spice_Name}
+              </Typography>
+              <Typography gutterBottom variant="h8" component="div">
+                Rs {spice.Selling_Price}
+              </Typography>
+              {expandedSpice === spice.Spice_Name ? (
+                <Typography variant="body2" color="text.secondary">
+                  {spice.Description}
+                </Typography>
+              ) : null}
+            </CardContent>
+            <CardActions>
+              <Button size="small" onClick={() => handleLearnMoreClick(spice.Spice_Name)}>
+                {expandedSpice === spice.Spice_Name ? 'Show Less' : 'Learn More'}
+              </Button>
+            </CardActions>
+          </Card>
+        ))}
       </div>
+      <Footer />
     </>
-  ); 
+  );
 }
 
 export default CusHome;

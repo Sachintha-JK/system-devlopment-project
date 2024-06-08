@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Container, Button, Modal, Form, Row, Col } from 'react-bootstrap';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper, 
+  Button, 
+  Modal, 
+  Typography 
+} from '@mui/material';
 import AddSupplier from '../../component/AddSupplier'; // Adjust the import path as needed
 import EditSupplier from '../../component/EditSupplier'; // Import the EditSupplier component
 import BmNbar from '../../component/BmNbar';
@@ -83,51 +94,53 @@ function ViewSupplier() {
 
   return (
     <div>
-       <div>  <BmNbar /></div>
-      <Container className="mt-5">
-     
-        <Row>
-          <Col>
-            <h1>Registered Suppliers</h1>
-          </Col>
-          <Col>
-            <Form.Control
-              type="text"
-              placeholder="Search by supplier name"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </Col>
-        </Row>
-        <Button variant="primary" onClick={() => setShowAddModal(true)}>Add Supplier</Button>
-        <br />
-        <br />
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Contact Number</th>
-              <th>Address</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredSuppliers.map((supplier) => (
-              <tr key={supplier.Supplier_ID}>
-                <td>{supplier.Supplier_ID}</td>
-                <td>{supplier.Name}</td>
-                <td>{supplier.Contact_Number}</td>
-                <td>{`${supplier.Address1}, ${supplier.Address2}`}</td>
-                <td>
-                  <Button variant="warning" onClick={() => handleEdit(supplier)}>Edit</Button>{' '}
-                  <Button variant="danger" onClick={() => confirmDeactivate(supplier)}>Deactivate</Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </Container>
+       <BmNbar />
+      <div style={{ padding: '20px' }}>
+        <Typography variant="h4">Registered Suppliers</Typography>
+        <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+          <input
+            type="text"
+            placeholder="Search by supplier name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ padding: '5px', marginRight: '10px' }}
+          />
+          <Button variant="contained" color="primary" onClick={() => setShowAddModal(true)}>
+            Add Supplier
+          </Button>
+        </div>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><Typography variant="h6" fontWeight="bold">ID</Typography></TableCell>
+                <TableCell><Typography variant="h6" fontWeight="bold">Name</Typography></TableCell>
+                <TableCell><Typography variant="h6" fontWeight="bold">Contact Number</Typography></TableCell>
+                <TableCell><Typography variant="h6" fontWeight="bold">Address</Typography></TableCell>
+                <TableCell><Typography variant="h6" fontWeight="bold">Actions</Typography></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredSuppliers.map((supplier) => (
+                <TableRow key={supplier.Supplier_ID}>
+                  <TableCell>{supplier.Supplier_ID}</TableCell>
+                  <TableCell>{supplier.Name}</TableCell>
+                  <TableCell>{supplier.Contact_Number}</TableCell>
+                  <TableCell>{`${supplier.Address1}, ${supplier.Address2}`}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" color="success" onClick={() => handleEdit(supplier)}>
+                      Edit
+                    </Button>
+                    <Button variant="contained" color="error" onClick={() => confirmDeactivate(supplier)}>
+                      Deactivate
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
       {branchManager && (
         <AddSupplier
           show={showAddModal}
@@ -145,18 +158,18 @@ function ViewSupplier() {
           onSave={handleEditSave}
         />
       )}
-      <Modal show={showDeleteModal} onHide={cancelDeactivate}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Deactivation</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to deactivate this supplier?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={cancelDeactivate}>Cancel</Button>
-          <Button variant="danger" onClick={() => {
-            handleDeactivate(supplierToDelete);
-            cancelDeactivate(); // Closing modal after deactivation
-          }}>Deactivate</Button>
-        </Modal.Footer>
+      <Modal open={showDeleteModal} onClose={cancelDeactivate}>
+        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '5px' }}>
+          <Typography variant="h6">Confirm Deactivation</Typography>
+          <Typography>Are you sure you want to deactivate this supplier?</Typography>
+          <div style={{ marginTop: '20px' }}>
+            <Button variant="contained" onClick={cancelDeactivate}>Cancel</Button>
+            <Button variant="contained" color="error" onClick={() => {
+              handleDeactivate(supplierToDelete);
+              cancelDeactivate(); // Closing modal after deactivation
+            }}>Deactivate</Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

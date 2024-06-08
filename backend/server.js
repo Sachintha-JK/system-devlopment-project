@@ -96,7 +96,7 @@ app.get('/branch_manager/:userId', async (req, res) => {
 //************spices dropdown
 
 app.get('/spice', (req, res) => {
-  const sql = 'SELECT Spice_Id, Spice_Name FROM spice';
+  const sql = 'SELECT Spice_ID, Spice_Name FROM spice';
   db.query(sql, (err, result) => {
     if (err) {
       console.error('Error fetching Spices', err);
@@ -210,7 +210,7 @@ app.get('/spices', (req, res) => {
   });
 });
 //--------------Place Order-Customer Order
-app.post('/place_order', async (req, res) => {
+/*app.post('/place_order', async (req, res) => {
   try {
     const { Customer_ID, Deliver_Date, orderItems } = req.body;
     const Order_Date = moment().format('YYYY-MM-DD');
@@ -251,6 +251,73 @@ app.post('/place_order', async (req, res) => {
     res.status(500).json({ error: 'Failed to place order' });
   }
 });
+*/
+
+//-------------------
+app.post('/plce_order', async (req, res) => {
+  try {
+    const { Customer_ID, Order_Date, Deliver_Date, orderItems } = req.body;
+    let adjustedDeliverDate = Deliver_Date;
+
+    const insertOrderQuery = 'INSERT INTO customer_order (Customer_ID, Order_Date, Deliver_Date) VALUES (?, ?, ?)';
+    const insertOrderItemQuery = 'INSERT INTO order_spice (Order_ID, Spice_ID, Quantity, Value) VALUES (?, ?, ?, ?)';
+    const selectSpiceStockQuery = 'SELECT Stock FROM spice WHERE Spice_ID = ?';
+
+    // Check stock levels and adjust the delivery date if necessary
+    for (const item of orderItems) {
+      const spiceStockResult = await new Promise((resolve, reject) => {
+        db.query(selectSpiceStockQuery, [item.Spice_ID], (err, result) => {
+          if (err) {
+            console.error('Error checking spice stock:', err);
+            return reject(err);
+          }
+          resolve(result);
+        });
+      });
+
+      const spiceStock = spiceStockResult[0].Stock;
+
+      // Adjust delivery date if the order quantity minus stock exceeds 200 kg
+      if (item.Quantity - spiceStock > 200) {
+        adjustedDeliverDate = moment().add(1, 'week').format('YYYY-MM-DD');
+        break; // Exit the loop after adjusting delivery date for one item
+      }
+    }
+
+    // Insert into customer_order table
+    const orderResult = await new Promise((resolve, reject) => {
+      db.query(insertOrderQuery, [Customer_ID, Order_Date, adjustedDeliverDate], (err, result) => {
+        if (err) {
+          console.error('Error inserting customer order:', err);
+          return reject(err);
+        }
+        resolve(result);
+      });
+    });
+
+    const Order_ID = orderResult.insertId; // Get the generated Order_ID
+
+    // Insert into order_spice table for each item in the orderItems array
+    const orderItemPromises = orderItems.map(item => {
+      return new Promise((resolve, reject) => {
+        db.query(insertOrderItemQuery, [Order_ID, item.Spice_ID, item.Quantity, item.Value], (err) => {
+          if (err) {
+            console.error('Error inserting order item:', err);
+            return reject(err);
+          }
+          resolve();
+        });
+      });
+    });
+
+    await Promise.all(orderItemPromises);
+    res.status(200).json({ message: 'Order placed successfully!', deliveryDate: adjustedDeliverDate });
+  } catch (error) {
+    console.error('Error placing order:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 //---------------Payment-Customer view
 
 app.get('/customer_order/:customerId', (req, res) => {
@@ -296,6 +363,23 @@ app.get('/check_stock', (req, res) => {
     }
     console.log('Query result:', data);  // Log the data for debugging
     return res.json({ spices: data });
+  });
+});
+//********************check existing time slots for he selected date************************** */
+app.get('/checktime/:date', (req, res) => {
+  const  date = req.params.date;
+  console.log("date",date);
+
+  // SQL query to get appointments for the given date
+  const query = 'SELECT time FROM appointment WHERE selected_date = ?';
+  
+  // Execute the query
+  db.query(query, [date], (error, results) => {
+    if (error) {
+      console.error('Error fetching appointments:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+    res.json(results);
   });
 });
 //********************get branch_manager userID************************** */
@@ -608,11 +692,8 @@ app.get('/appointment/:supplierId', (req, res) => {
 });
 //************************Place appointment* */
 app.post('/appointment', (req, res) => {
-  const { supplierId, selecteddate, time, spices } = req.body;
+  const { supplierId, selecteddate, time, spices, description } = req.body;
   const currentDate = moment().format('YYYY-MM-DD'); // Get the current date in 'YYYY-MM-DD' format
-
-  // Create the description string from the spices array
-  const description = spices.map(spice => `${spice.spiceName}-${spice.quantity}`).join(', ');
 
   const sql = "INSERT INTO appointment (Supplier_ID, Date, Selected_Date, Time, Comment, Approval) VALUES (?, ?, ?, ?, ?, 10)"; // Assuming '10' is the default value for 'Approval'
 
@@ -629,6 +710,8 @@ app.post('/appointment', (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+//*************************************************** */
+
 //********************************view supplies(branch manager)****************************** */
 app.get('/spice_quantities/:branchId', (req, res) => {
   const branchId = req.params.branchId;
@@ -1068,7 +1151,7 @@ app.post('/adspice', upload.single('Image'), (req, res) => {
     } else {
       console.log('New spice added successfully');
       res.status(200).send({ success: true });
-    }
+    } 
   });
 });
 //**************************************calendar */

@@ -1,60 +1,65 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'react-bootstrap';
 import axios from 'axios';
 import moment from 'moment';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
 function SpaymentView() {
-    const [supplyDetails, setSupplyDetails] = useState([]);
-  
-    useEffect(() => {
-      fetchSupplyDetails();
-    }, []);
-  
-    const fetchSupplyDetails = async () => {
-        try {
-          const response = await axios.get('http://localhost:8081/supply_details');
-          console.log('Response status:', response.status); // Log the response status
-          console.log('Response data:', response.data); // Log the response data
-          setSupplyDetails(response.data);
-        } catch (error) {
-          console.error('Error fetching supply details:', error);
-        }
-      };
-      
-    return (
-        <div style={{ margin: '50px' }}>
-        <h2>Supply Details</h2>
-        
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Supply ID</th>
-              <th>Supplier Name</th>
-              <th>Supply Date</th>
-              <th>Payment</th>
-              <th>Spice ID</th>
-              <th>Quantity</th>
-              <th>Value</th>
-              <th>Payment Status</th>
-            </tr>
-          </thead>
-          <tbody>
+  const [supplyDetails, setSupplyDetails] = useState([]);
+
+  useEffect(() => {
+    fetchSupplyDetails();
+  }, []);
+
+  const fetchSupplyDetails = async () => {
+    try {
+      const response = await axios.get('http://localhost:8081/supply_details');
+      console.log('Response status:', response.status); // Log the response status
+      console.log('Response data:', response.data); // Log the response data
+      setSupplyDetails(response.data);
+    } catch (error) {
+      console.error('Error fetching supply details:', error);
+    }
+  };
+
+  return (
+    <Box sx={{ margin: '50px' }}>
+      {/* Center-align the header */}
+      <Typography variant="h4" align="center" gutterBottom>
+        Supply Details
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead sx={{ backgroundColor: '#000' }}>
+            <TableRow>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Supply ID</TableCell>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Supplier Name</TableCell>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Supply Date</TableCell>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Payment</TableCell>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Spice ID</TableCell>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Quantity</TableCell>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Value</TableCell>
+              <TableCell sx={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Payment Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {supplyDetails.map((supply) => (
-              <tr key={supply.Supply_ID}>
-                <td>{supply.Supply_ID}</td>
-                <td>{supply.Name}</td>
-                <td>{moment(supply.Supply_Date).format('YYYY-MM-DD')}</td> 
-                <td>{supply.Payment}</td>
-                <td>{supply.Spice_ID}</td>
-                <td>{supply.Quantity}</td>
-                <td>{supply.Value}</td>
-                <td>{supply.Payment_Status === 1 ? 'Paid' : 'Pending'}</td>
-              </tr>
+              <TableRow key={supply.Supply_ID}>
+                <TableCell sx={{ fontSize: '1rem' }}>{supply.Supply_ID}</TableCell>
+                <TableCell sx={{ fontSize: '1rem' }}>{supply.Name}</TableCell>
+                <TableCell sx={{ fontSize: '1rem' }}>{moment(supply.Supply_Date).format('YYYY-MM-DD')}</TableCell>
+                <TableCell sx={{ fontSize: '1rem' }}>{supply.Payment}</TableCell>
+                <TableCell sx={{ fontSize: '1rem' }}>{supply.Spice_ID}</TableCell>
+                <TableCell sx={{ fontSize: '1rem' }}>{supply.Quantity}</TableCell>
+                <TableCell sx={{ fontSize: '1rem' }}>{supply.Value}</TableCell>
+                <TableCell sx={{ fontSize: '1rem' }}>{supply.Payment_Status === 1 ? 'Paid' : 'Pending'}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
+          </TableBody>
         </Table>
-      </div>
-    );
+      </TableContainer>
+    </Box>
+  );
 }
 
 export default SpaymentView;

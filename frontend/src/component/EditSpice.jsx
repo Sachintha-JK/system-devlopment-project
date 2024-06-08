@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { TextField, Button, Grid, Paper } from '@mui/material';
 import axios from 'axios';
 
 function EditSpice({ spice, onSave, onClose }) {
@@ -27,48 +27,55 @@ function EditSpice({ spice, onSave, onClose }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Form.Group controlId="formSpiceName">
-        <Form.Label>Spice Name</Form.Label>
-        <Form.Control 
-          type="text" 
-          placeholder="Enter spice name" 
-          name="Spice_Name" 
-          value={editedSpice.Spice_Name} 
-          onChange={handleChange} 
-          required 
-        />
-      </Form.Group>
-      
-      <Form.Group controlId="formBuyingPrice">
-        <Form.Label>Buying Price</Form.Label>
-        <Form.Control 
-          type="number" 
-          placeholder="Enter buying price" 
-          name="Buying_Price" 
-          value={editedSpice.Buying_Price} 
-          onChange={handleChange} 
-          required 
-        />
-      </Form.Group>
-      <Form.Group controlId="formSellingPrice">
-        <Form.Label>Selling Price</Form.Label>
-        <Form.Control 
-          type="number" 
-          placeholder="Enter selling price" 
-          name="Selling_Price" 
-          value={editedSpice.Selling_Price} 
-          onChange={handleChange} 
-          required 
-        />
-      </Form.Group>
-      <Button variant="primary" type="submit">
-        Save
-      </Button>
-      <Button variant="secondary" onClick={onClose} style={{ marginLeft: '10px' }}>
-        Cancel
-      </Button>
-    </Form>
+    <Paper elevation={3} style={{ padding: '20px', backgroundColor: 'white', maxWidth: '400px', margin: '0 auto' }}>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField 
+              fullWidth
+              label="Spice Name"
+              variant="outlined"
+              name="Spice_Name"
+              value={editedSpice.Spice_Name}
+              onChange={handleChange}
+              required 
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField 
+              fullWidth
+              label="Buying Price"
+              variant="outlined"
+              type="number"
+              name="Buying_Price"
+              value={editedSpice.Buying_Price}
+              onChange={handleChange}
+              required 
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField 
+              fullWidth
+              label="Selling Price"
+              variant="outlined"
+              type="number"
+              name="Selling_Price"
+              value={editedSpice.Selling_Price}
+              onChange={handleChange}
+              required 
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Button variant="contained" color="primary" type="submit">
+              Save
+            </Button>
+            <Button variant="contained" color="secondary" onClick={onClose} style={{ marginLeft: '10px' }}>
+              Cancel
+            </Button>
+          </Grid>
+        </Grid>
+      </form>
+    </Paper>
   );
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Container, Button, Modal } from 'react-bootstrap';
+import { Container, Button, Checkbox, Modal, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper } from '@mui/material';
 import AddSupply from '../../component/AddSupply';
 import BmNbar from '../../component/BmNbar';
 
@@ -97,95 +97,81 @@ function Supply() {
 
   return (
     <div>
-       <div>  <BmNbar /></div>
-   
-    <Container className="mt-5">
-      
-      <h1>Spice Collection Details</h1>
-      <Button variant="primary" onClick={handleAddSupplyClick} className="mb-3">
-        Add Supply
-      </Button>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Supplier Name</th>
-            <th>Contact Number</th>
-            <th>Date</th>
-            <th>Spice Name</th>
-            <th>Quantity</th>
-            <th>Value</th>
-            <th>Payment</th>
-            <th>Payment Status</th>
-           
-          </tr>
-        </thead>
-        <tbody>
-          {supplyDetails.map((detail, index) => (
-            <React.Fragment key={detail.Supply_ID}>
-              <tr>
-                <td onClick={() => handleSupplyIdClick(detail.Supply_ID)} style={{ cursor: 'pointer' }}>
-                  {detail.Supply_ID}
-                </td>
-                <td>{detail.Supplier_Name}</td>
-                <td>{detail.Contact_Number}</td>
-                <td>{new Date(detail.Supply_Date).toLocaleDateString()}</td>
-                <td>{detail.Spice_Name}</td>
-                <td>{detail.Quantity}</td>
-                <td>{detail.Value}</td>
-                <td>{detail.Payment}</td>
-                <td>
-                  <input
-                    type="checkbox"
-                    disabled={detail.disabled}
-                    checked={detail.Payment_Status === 1}
-                    onClick={() => handleCheckboxClick(index, detail.Supply_ID)}
-                  />
-                </td>
-               
-              </tr>
-              {selectedSupplyId === detail.Supply_ID && (
-                <tr>
-                  <td colSpan="10">
-                    <strong>Added By:</strong> {detail.A_User_ID}, 
-                    <br/>
-                    <strong>Paid By:</strong> {detail.P_User_ID}
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </Table>
+      <BmNbar />
+      <Container className="mt-5">
+        <h1 style={{ textAlign: 'center' }}>Spice Collection Details</h1>
+        <Button variant="contained" onClick={handleAddSupplyClick} style={{ marginBottom: '20px' }}>
+          Add Supply
+        </Button>
+        <TableContainer component={Paper}>
+          <Table sx={{ fontSize: '1.2rem' }}>
+            <TableHead>
+              <TableRow>
+                <TableCell><b>ID</b></TableCell>
+                <TableCell><b>Supplier Name</b></TableCell>
+                <TableCell><b>Contact Number</b></TableCell>
+                <TableCell><b>Date</b></TableCell>
+                <TableCell><b>Spice Name</b></TableCell>
+                <TableCell><b>Quantity</b></TableCell>
+                <TableCell><b>Value</b></TableCell>
+                <TableCell><b>Payment</b></TableCell>
+                <TableCell><b>Payment Status</b></TableCell>
+                <TableCell><b>Added By</b></TableCell>
+                <TableCell><b>Paid By</b></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {supplyDetails.map((detail, index) => (
+                <React.Fragment key={detail.Supply_ID}>
+                  <TableRow>
+                    <TableCell onClick={() => handleSupplyIdClick(detail.Supply_ID)} style={{ cursor: 'pointer' }}>
+                      {detail.Supply_ID}
+                    </TableCell>
+                    <TableCell>{detail.Supplier_Name}</TableCell>
+                    <TableCell>{detail.Contact_Number}</TableCell>
+                    <TableCell>{new Date(detail.Supply_Date).toLocaleDateString()}</TableCell>
+                    <TableCell>{detail.Spice_Name}</TableCell>
+                    <TableCell>{detail.Quantity}</TableCell>
+                    <TableCell>{detail.Value}</TableCell>
+                    <TableCell>{detail.Payment}</TableCell>
+                    <TableCell>
+                      <Checkbox
+                        disabled={detail.disabled}
+                        checked={detail.Payment_Status === 1}
+                        onClick={() => handleCheckboxClick(index, detail.Supply_ID)}
+                      />
+                    </TableCell>
+                    <TableCell>{detail.A_User_ID}</TableCell>
+                    <TableCell>{detail.P_User_ID}</TableCell>
+                  </TableRow>
+                  {selectedSupplyId === detail.Supply_ID && (
+                    <TableRow>
+                      <TableCell colSpan={12}>
+                        <strong>Additional Details:</strong> {detail.Other_Details}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      {/* AddSupply Modal */}
-      <Modal show={showAddSupplyModal} onHide={handleCloseAddSupplyModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add Supply</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+        {/* AddSupply Modal */}
+        <Modal open={showAddSupplyModal} onClose={handleCloseAddSupplyModal}>
           <AddSupply onAddSupply={handleAddSupply} />
-        </Modal.Body>
-      </Modal>
+        </Modal>
 
-      {/* Confirmation Modal */}
-      <Modal show={confirmationModal} onHide={handleCloseConfirmationModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Payment</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to mark this supply as paid?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseConfirmationModal}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleConfirmPayment}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+        {/* Confirmation Modal */}
+        <Modal open={confirmationModal} onClose={handleCloseConfirmationModal}>
+          <div style={{ backgroundColor: 'white', padding: '20px' }}>
+            <h2>Confirm Payment</h2>
+            <p>Are you sure you want to mark this supply as paid?</p>
+            <Button variant="contained" color="primary" onClick={handleConfirmPayment} style={{ marginRight: '10px' }}>Confirm</Button>
+            <Button variant="contained" onClick={handleCloseConfirmationModal}>Cancel</Button>
+          </div>
+        </Modal>
+      </Container>
     </div>
   );
 }

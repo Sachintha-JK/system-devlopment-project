@@ -1,13 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form,Tooltip, OverlayTrigger} from 'react-bootstrap';
+import {
+  Button,
+  TextField,
+  MenuItem,
+  IconButton,
+  Tooltip,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Grid
+} from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import axios from 'axios';
 import moment from 'moment';
+import { Paper } from '@mui/material';
+
 import { ToastContainer, toast } from 'react-toastify';
+import CustomerBar from '../../component/CustomerBar';
 import 'react-toastify/dist/ReactToastify.css';
 import SpicesList from '../../component/Availability';
 
-
- 
 function CusPayment() {
   const [spices, setSpices] = useState([]);
   const [formFields, setFormFields] = useState([{ spice: '', quantity: '' }]);
@@ -15,7 +28,7 @@ function CusPayment() {
   const [deliverDate, setDeliverDate] = useState('');
   const [customerId, setCustomerId] = useState(null);
   const [showSpicesList, setShowSpicesList] = useState(false);
- 
+
   const fetchCustomerId = async () => {
     try {
       const userJson = localStorage.getItem('user');
@@ -77,120 +90,182 @@ function CusPayment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const orderDate = moment().format('YYYY-MM-DD');
+    let adjustedDeliverDate = deliverDate; // Initialize with the selected deliverDate
+  
     try {
       const orderItems = formFields.map(field => {
         const spice = spices.find(s => s.Spice_Name === field.spice);
         const quantity = parseInt(field.quantity);
         return {
-          Spice_ID: spice.Spice_ID, 
+          Spice_ID: spice.Spice_ID,
           Quantity: quantity,
           Value: field.quantity * spice.Selling_Price,
         };
       });
-
+  
+      // Check if any spice exceeds stock limit
+      for (const item of orderItems) {
+        const spice = spices.find(s => s.Spice_ID === item.Spice_ID);
+        const spiceStock = spice.Stock; // Define spiceStock variable
+        if (spiceStock && item.Quantity - spiceStock > 200) {
+          adjustedDeliverDate = moment().add(7, 'days').format('YYYY-MM-DD');
+          break; // Exit the loop after adjusting delivery date for one item
+        }
+      }
+  
+      // Continue with order placement
+  
       const orderData = {
         Customer_ID: customerId,
         Order_Date: orderDate,
-        Deliver_Date: deliverDate,
+        Deliver_Date: adjustedDeliverDate,
         orderItems: orderItems,
       };
-
-      console.log('Order data:', orderData);
-      await axios.post('http://localhost:8081/place_order', orderData);
-      toast.success('Order placed successfully!');
-      setFormFields([{ spice: '', quantity: '' }]);
-      setDeliverDate('');
-      setOrderValue(0);
-      fetchCustomerOrders();
+  
+      const response = await axios.post('http://localhost:8081/plce_order', orderData);
+  
+      if (response.data.deliveryDate !== deliverDate) {
+        toast.info(`Please select a delivery date after one week from today (${adjustedDeliverDate}).`);
+        setDeliverDate(adjustedDeliverDate); // Update the state with adjusted date
+      } else {
+        toast.success('Order placed successfully!');
+        // Clear form fields only after successful order placement
+        setFormFields([{ spice: '', quantity: '' }]);
+        setDeliverDate('');
+        setOrderValue(0);
+        fetchCustomerOrders();
+      }
     } catch (error) {
       console.error('Error submitting order:', error);
-      toast.error('Error submitting order.');
+      toast.error(error.message);
     }
   };
 
   return (
     <div>
-
+      <div><CustomerBar /></div>
     
-       <br/>
-       <br/>
-      <div style={{ textAlign: 'center' }}>
-        <h1>Orders</h1>
-      </div>
+      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
+  <Typography variant="h4" align="center">Order Details</Typography>
+</Paper>
+<br/>
+<br/>
+      <Box textAlign="center" mt={2} mb={2} sx={{ marginLeft: '-750px' }}>
+  <Button variant="contained" color="primary" onClick={() => setShowSpicesList(true)}>
+    Check Spice Availability
+  </Button>
+  <SpicesList show={showSpicesList} handleClose={() => setShowSpicesList(false)} />
+</Box>
 
-      <div style={{ margin: 'auto', padding: '20px', width: 'fit-content',fontSize:'20px' }}>
-      <Button variant="primary" onClick={() => setShowSpicesList(true)}>
-          Check Spice Availability
-        </Button>
-        <SpicesList show={showSpicesList} handleClose={() => setShowSpicesList(false)} />
-      </div>
-      
-      <div style={{ margin: 'auto', border: '1px solid black', padding: '20px', width: 'fit-content',fontSize:'20px' }}>
-       <Form onSubmit={handleSubmit}>
-          {formFields.map((field, index) => (
-            <div key={index} className="d-flex flex-row align-items-center mb-3">
-              <Form.Group className="flex-fill" controlId={`formBasicType${index}`}>
-                <Form.Label>Spice Type</Form.Label>
-                <Form.Select
+
+      <Card variant="outlined" sx={{ maxWidth: 1000, margin: '0 auto' }}> {/* Increased card width */}
+  <CardContent>
+    <Grid container spacing={2}>
+      <Grid item xs={12} md={6} sx={{ mt: 3 }}>
+        <Typography variant="h6">Dear valued customer,</Typography>
+        <Typography variant="body1" paragraph>
+          We appreciate your interest in our products and services. To maintain stock efficiency and ensure quality service for orders over 200kg, we have established the following:
+        </Typography>
+        <Typography variant="body1" paragraph>
+          <ul>
+            <li>Orders exceeding 200kg require one week for processing to assess inventory and ensure timely delivery.</li>
+            <li>Upon order receipt, we promptly confirm spice availability.</li>
+            <li>If only a portion of your requested quantity is available, we will inform you for confirmation.</li>
+          </ul>
+        </Typography>
+        <Typography variant="body1" paragraph>
+          Your understanding and patience are appreciated as we aim to meet your needs to the fullest.
+        </Typography>
+        <Typography variant="h6">Best regards,</Typography>
+        <Typography variant="body1">Manager</Typography>
+        <Typography variant="body1">Vikum Spice Shop</Typography>
+      </Grid>
+      <Grid item xs={12} md={6} sx={{ mt: 3 }}>
+        <Box sx={{ height: '100%', borderLeft: '1px solid grey', pl: 2 }}>
+          <form onSubmit={handleSubmit}>
+            {formFields.map((field, index) => (
+              <Box key={index} display="flex" alignItems="center" mb={2}>
+                <TextField
+                  select
                   name="spice"
+                  label="Spice Type"
                   value={field.spice}
                   onChange={(e) => handleFormChange(index, e)}
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
                 >
-                  <option>Select the Spice</option>
+                  <MenuItem value="">
+                    <em>Select the Spice</em>
+                  </MenuItem>
                   {spices.map((spice) => (
-                    <option key={spice.Spice_Name} value={spice.Spice_Name}>
+                    <MenuItem key={spice.Spice_Name} value={spice.Spice_Name}>
                       {spice.Spice_Name}
-                    </option>
+                    </MenuItem>
                   ))}
-                </Form.Select>
-              </Form.Group>
+                </TextField>
 
-              <Form.Group className="flex-fill ms-3" controlId={`formBasicTime${index}`}>
-                <Form.Label>Quantity</Form.Label>
-                <Form.Control
+                <TextField
                   type="number"
                   name="quantity"
+                  label="Quantity"
                   placeholder="Add the Quantity"
                   value={field.quantity}
                   onChange={(e) => handleFormChange(index, e)}
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  sx={{ mx: 2 }}
                 />
-              </Form.Group>
 
-              {index === formFields.length - 1 && (
-                <Button variant="secondary" onClick={addFormField} className="ms-2" title="Add more Spice Types">
-                  +
-                </Button>
-              )}
-            </div>
-          ))}
+                {index === formFields.length - 1 && (
+                  <Tooltip title="Add more Spice Types">
+                    <IconButton color="primary" onClick={addFormField}>
+                      <AddCircleIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
+            ))}
 
-          <Form.Group className="mb-3" controlId="formBasicDate">
-            <Form.Label>Date</Form.Label>
-            <Form.Control
+            <TextField
               type="date"
-              placeholder="Select the Date"
+              label="Delivery Date"
               value={deliverDate}
               onChange={(e) => setDeliverDate(e.target.value)}
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+              }}
               required
             />
-          </Form.Group>
 
-          
+            <Box mt={2}>
+              <Tooltip title="Submit your order">
+                <Button variant="contained" color="primary" type="submit">
+                  Submit
+                </Button>
+              </Tooltip>
+            </Box>
+          </form>
 
-          <OverlayTrigger
-          placement="top"
-          overlay={<Tooltip id="tooltip-submit">Submit your order</Tooltip>}>
-            <Button variant="primary" type="submit" className="submit-button" style={{ backgroundColor: '#1F618D', textAlign: 'center' }}>
-           Submit
-           </Button>
-</OverlayTrigger>
-        </Form>
+          <Box mt={2}>
+  <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h6">Order Value</Typography>
+      <Typography variant="h4">Rs {ordervalue.toFixed(2)}</Typography>
+    </CardContent>
+  </Card>
+</Box>
+        </Box>
+      </Grid>
+    </Grid>
+  </CardContent>
+</Card>
 
-        <div style={{ marginTop: '20px' }}>
-          <h3>Order Value: Rs {ordervalue.toFixed(2)}</h3>
-        </div>
-      </div>
-      <ToastContainer className="custom-toast-container" />
+      <ToastContainer />
     </div>
   );
 }
