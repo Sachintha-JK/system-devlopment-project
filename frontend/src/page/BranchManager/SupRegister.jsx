@@ -41,8 +41,7 @@ function ViewSupplier() {
         const response = await axios.get(`http://localhost:8081/find_branch_manager/${userId}`);
         setBranchManager(response.data);
 
-        const branchId = response.data.Branch_ID;
-        const suppliersResponse = await axios.get(`http://localhost:8081/suppliers/${branchId}`);
+        const suppliersResponse = await axios.get(`http://localhost:8081/suppliers`);
         setSuppliers(suppliersResponse.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -94,7 +93,7 @@ function ViewSupplier() {
 
   return (
     <div>
-       <BmNbar />
+      <BmNbar />
       <div style={{ padding: '20px' }}>
         <Typography variant="h4">Registered Suppliers</Typography>
         <div style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -117,6 +116,7 @@ function ViewSupplier() {
                 <TableCell><Typography variant="h6" fontWeight="bold">Name</Typography></TableCell>
                 <TableCell><Typography variant="h6" fontWeight="bold">Contact Number</Typography></TableCell>
                 <TableCell><Typography variant="h6" fontWeight="bold">Address</Typography></TableCell>
+                <TableCell><Typography variant="h6" fontWeight="bold">Manager Info</Typography></TableCell>
                 <TableCell><Typography variant="h6" fontWeight="bold">Actions</Typography></TableCell>
               </TableRow>
             </TableHead>
@@ -127,6 +127,7 @@ function ViewSupplier() {
                   <TableCell>{supplier.Name}</TableCell>
                   <TableCell>{supplier.Contact_Number}</TableCell>
                   <TableCell>{`${supplier.Address1}, ${supplier.Address2}`}</TableCell>
+                  <TableCell>{supplier.Manager_Info}</TableCell>
                   <TableCell>
                     <Button variant="contained" color="success" onClick={() => handleEdit(supplier)}>
                       Edit

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -15,9 +16,9 @@ import AdbIcon from '@mui/icons-material/Adb';
 import Button from '@mui/material/Button';
 import { Link, useNavigate } from 'react-router-dom';
 
-const pages = ['Home','Payments', 'Place Order','Order Details']; // Change the display names
+const pages = ['Home','Appointment', 'Payments','Price List']; // Change the display names
 const settings = [
-    { label: 'Home', route: '/cushome' },
+    { label: 'Home', route: '/suphome' },
   { label: 'Profile', route: '/profile' },
   { label: 'Change Password', route: '/cpassword' },
   { label: 'Logout', route: '/logout' }
@@ -84,7 +85,7 @@ function ResponsiveAppBar() {
     <Button
       key={index}
       component={Link}
-      to={page === 'Payments' ? '/cpayments' : (page === 'Place Order' ? '/orders' : (page === 'Home' ? '/cushome' : (page === 'Order Details' ? '/pendingoc' : `/${page.toLowerCase()}`)))}
+      to={page === 'Appointments' ? '/appointment' :(page === 'Home' ? '/suphome' : (page === 'Payments' ? '/spayments' : (page === 'Price List' ? '/pricelevel' : (page === 'Order Details' ? '/pendingoc' : `/${page.toLowerCase()}`))))}
       sx={{ my: 2, color: '#fff', display: 'block' }}
       onClick={handleCloseNavMenu}
     >

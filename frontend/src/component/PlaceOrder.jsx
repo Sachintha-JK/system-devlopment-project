@@ -149,7 +149,11 @@ function CusPayment() {
     <div>
       <div><CustomerBar /></div>
     
-    
+      <Paper elevation={3} sx={{ padding: 2, marginBottom: 2 }}>
+        <Typography variant="h4" align="center">Order Details</Typography>
+      </Paper>
+      <br/>
+      <br/>
       <Box textAlign="center" mt={2} mb={2} sx={{ marginLeft: '-750px' }}>
         <Button variant="contained" color="primary" onClick={() => setShowSpicesList(true)}>
           Check Spice Availability

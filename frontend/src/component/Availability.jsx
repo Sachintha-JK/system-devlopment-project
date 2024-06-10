@@ -35,14 +35,15 @@ function SpicesList({ show, handleClose }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {spices.map((spice) => (
-                <TableRow key={spice.Spice_Name}>
-                  <TableCell>{spice.Spice_Name}</TableCell>
-                  <TableCell>{spice.Selling_Price}</TableCell>
-                  <TableCell>{spice.Stock}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+  {spices.map((spice) => (
+    <TableRow key={spice.Spice_Name}>
+      <TableCell>{spice.Spice_Name}</TableCell>
+      <TableCell>{spice.Selling_Price}</TableCell>
+      <TableCell>{spice.Stock === 0 ? 'Out of Stock' : spice.Stock}</TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+
           </Table>
         </TableContainer>
       </DialogContent>

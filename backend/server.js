@@ -258,10 +258,14 @@ app.post('/plce_order', async (req, res) => {
   try {
     const { Customer_ID, Order_Date, Deliver_Date, orderItems } = req.body;
     let adjustedDeliverDate = Deliver_Date;
+    const currentDate = moment().format('YYYY-MM-DD');
 
     const insertOrderQuery = 'INSERT INTO customer_order (Customer_ID, Order_Date, Deliver_Date) VALUES (?, ?, ?)';
     const insertOrderItemQuery = 'INSERT INTO order_spice (Order_ID, Spice_ID, Quantity, Value) VALUES (?, ?, ?, ?)';
     const selectSpiceStockQuery = 'SELECT Stock FROM spice WHERE Spice_ID = ?';
+
+    let canPlaceOrder = true;
+    let errorMessage = 'Cannot place order: Some items exceed stock limits and require a delivery date of at least one week from today.';
 
     // Check stock levels and adjust the delivery date if necessary
     for (const item of orderItems) {
@@ -277,11 +281,18 @@ app.post('/plce_order', async (req, res) => {
 
       const spiceStock = spiceStockResult[0].Stock;
 
-      // Adjust delivery date if the order quantity minus stock exceeds 200 kg
       if (item.Quantity - spiceStock > 200) {
-        adjustedDeliverDate = moment().add(1, 'week').format('YYYY-MM-DD');
-        break; // Exit the loop after adjusting delivery date for one item
+        if (moment(adjustedDeliverDate).diff(currentDate, 'days') < 7) {
+          canPlaceOrder = false;
+          break;
+        } else {
+          adjustedDeliverDate = moment().add(1, 'week').format('YYYY-MM-DD');
+        }
       }
+    }
+
+    if (!canPlaceOrder) {
+      return res.status(400).json({ error: errorMessage });
     }
 
     // Insert into customer_order table
@@ -295,7 +306,7 @@ app.post('/plce_order', async (req, res) => {
       });
     });
 
-    const Order_ID = orderResult.insertId; // Get the generated Order_ID
+    const Order_ID = orderResult.insertId;
 
     // Insert into order_spice table for each item in the orderItems array
     const orderItemPromises = orderItems.map(item => {
@@ -382,6 +393,38 @@ app.get('/checktime/:date', (req, res) => {
     res.json(results);
   });
 });
+
+
+//***********************Customer order-Status(Customer view) */
+app.get('/customer_allorder/:customerId', (req, res) => {
+  const customerId = req.params.customerId;
+  console.log('Received request for customer orders. Customer ID:', customerId);
+
+  const sql = `SELECT o.Order_ID, o.Deliver_Date,
+  GROUP_CONCAT(CONCAT(s.Spice_Name, ' - ', os.Quantity, '  - ', os.Value, ' ')) AS Spices,
+  SUM(os.Quantity * os.Value) AS Total_Value,
+  o.Accept_Status
+FROM customer_order o
+JOIN order_spice os ON os.Order_ID = o.Order_ID
+JOIN spice s ON os.Spice_ID = s.Spice_ID
+WHERE o.Customer_ID = ?
+GROUP BY o.Order_ID, o.Deliver_Date, o.Accept_Status`;
+
+  db.query(sql, [customerId], (err, data) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    if (data.length === 0) {
+      console.log('No orders found for customer ID:', customerId);
+      return res.status(404).json({ error: "Orders not found" });
+    }
+    console.log('Query result:', data);
+    return res.json({ orders: data });
+  });
+});
+
+
 //********************get branch_manager userID************************** */
 
 app.get('/find_branch_manager/:userId', (req, res) => {
@@ -400,22 +443,32 @@ app.get('/find_branch_manager/:userId', (req, res) => {
   });
 });
 // ------view supplier(branch manager)
-app.get('/suppliers/:branchId', (req, res) => {
-  const branchId = req.params.branchId;
-  const sql = "SELECT * FROM supplier WHERE Active_Status = 1";
- 
+app.get('/suppliers', (req, res) => {
+  const sql = `
+    SELECT 
+      supplier.Supplier_ID, 
+      supplier.Name, 
+      supplier.Contact_Number, 
+      supplier.Address1, 
+      supplier.Address2, 
+      CONCAT(branch_manager.Manager_ID, '-', branch_manager.Name) AS Manager_Info
+    FROM supplier
+    JOIN branch_manager ON supplier.A_User_ID = branch_manager.User_ID
+    WHERE supplier.Active_Status = 1;
+  `;
 
-  db.query(sql, [branchId], (err, result) => {
+  db.query(sql, (err, result) => {
     if (err) {
       console.error("Error retrieving suppliers:", err);
       return res.status(500).json({ error: "Internal Server Error", details: err });
     }
     if (result.length === 0) {
-      return res.status(404).json({ error: "No suppliers found for this branch" });
+      return res.status(404).json({ error: "No suppliers found" });
     }
     return res.json(result);
   });
 });
+
 //************register supplier******************** */
 app.post('/suppliers', (req, res) => {
   const { Name, Contact_Number, Address1, Address2, Branch_ID, User_Name, Password, A_User_ID } = req.body;
@@ -692,13 +745,13 @@ app.get('/appointment/:supplierId', (req, res) => {
 });
 //************************Place appointment* */
 app.post('/appointment', (req, res) => {
-  const { supplierId, selecteddate, time, spices, description } = req.body;
+  const { supplierId, selecteddate, time, spices, description, branchId } = req.body;
   const currentDate = moment().format('YYYY-MM-DD'); // Get the current date in 'YYYY-MM-DD' format
 
-  const sql = "INSERT INTO appointment (Supplier_ID, Date, Selected_Date, Time, Comment, Approval) VALUES (?, ?, ?, ?, ?, 10)"; // Assuming '10' is the default value for 'Approval'
+  const sql = "INSERT INTO appointment (Supplier_ID, Date, Selected_Date, Time, Comment, Approval, Branch_ID) VALUES (?, ?, ?, ?, ?, 10, ?)"; // Assuming '10' is the default value for 'Approval'
 
   try {
-    db.query(sql, [supplierId, currentDate, selecteddate, time, description], (err, result) => {
+    db.query(sql, [supplierId, currentDate, selecteddate, time, description, branchId], (err, result) => {
       if (err) {
         console.error('Error executing query:', err);
         return res.status(500).json({ error: "Internal Server Error" });
@@ -710,7 +763,79 @@ app.post('/appointment', (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 //*************************************************** */
+// Import necessary modules and configure database connection
+
+// GET appointments route
+// Route to view appointments for a branch manager
+app.get('/view_appointments_bm', (req, res) => {
+  const query = `
+    SELECT 
+      appointment.Appointment_ID,
+      supplier.Name,
+      appointment.Selected_Date,
+      appointment.Time,
+      branch.Branch_Name,
+      appointment.Comment,
+      appointment.Approval
+    FROM 
+      appointment
+    JOIN 
+      supplier ON appointment.Supplier_ID = supplier.Supplier_ID
+    JOIN 
+      branch ON appointment.Branch_ID = branch.Branch_ID;
+  `;
+  console.log("Executing query:", query); // Add this line to log the executed query
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching appointments:', err);
+      return res.status(500).json({ error: 'Failed to fetch appointments' });
+    }
+    console.log("Appointments fetched successfully:", results); // Add this line to log the fetched appointments
+    res.status(200).json(results);
+  });
+});
+//*********************update appointment */
+let appointments = [
+  { Appointment_ID: 1, Approval: 10 },
+  { Appointment_ID: 2, Approval: 10 }
+  // Add other appointments here
+];
+
+app.post('/update_appointment', async (req, res) => {
+  const { id, approval } = req.body;
+  console.log(`Received request to update appointment ${id} to ${approval}`);
+
+  try {
+    const [result] = await pool.query('UPDATE appointment SET Approval = ? WHERE Appointment_ID = ?', [approval, id]);
+
+    if (result.affectedRows > 0) {
+      console.log(`Appointment ${id} updated to ${approval}`);
+      res.sendStatus(200);
+    } else {
+      console.log(`Appointment ${id} not found`);
+      res.status(404).send('Appointment not found');
+    }
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Endpoint to view appointments
+app.get('/view_appointments_bm', async (req, res) => {
+  try {
+    const [appointments] = await pool.query('SELECT * FROM appointment');
+    res.json(appointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
+
 
 //********************************view supplies(branch manager)****************************** */
 app.get('/spice_quantities/:branchId', (req, res) => {

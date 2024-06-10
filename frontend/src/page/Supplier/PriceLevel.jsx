@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import AccountNbar from '../../component/AccountNbar';
+import SupplierBar from '../../component/SupplierBar';
 import axios from 'axios';
 import {
   Table,
@@ -30,18 +30,9 @@ function PriceLevel() {
 
   return (
     <div>
-      <AccountNbar />
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <Card sx={{ width: '50%', boxShadow: 3 }}>
-          <CardContent>
-            <Typography variant="h4" gutterBottom>
-              Price Levels
-            </Typography>
-          </CardContent>
-        </Card>
-      </Box>
+      <SupplierBar />
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-        <TableContainer component={Paper} sx={{ width: '90%' }}>
+        <TableContainer component={Paper} sx={{ width:700 }}>
           <Table>
             <TableHead>
               <TableRow>

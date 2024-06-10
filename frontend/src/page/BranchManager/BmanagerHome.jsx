@@ -3,13 +3,13 @@ import Container from 'react-bootstrap/Container';
 import BmNbar from '../../component/BmNbar';
 
 
+
 function BmanagerHome() {
     return (
-        <Container fluid>
-         
-                    <BmNbar />
-              
-        </Container>
+      <div>
+           <BmNbar />  
+        </div>
+        
     );
 }
 

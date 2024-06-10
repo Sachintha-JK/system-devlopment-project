@@ -23,6 +23,7 @@ function Hnbar() {
           <Nav.Link href="/SupRegister" style={{ color: 'black' }}>Supplier</Nav.Link>
                     <Nav.Link href="/supply" style={{ color: 'black' }}>Collection</Nav.Link>
                     <Nav.Link href="/branchstock" style={{ color: 'black' }}>Availability</Nav.Link>
+                    <Nav.Link href="/appointmentbm" style={{ color: 'black' }}>Appointment</Nav.Link>
             
   
            

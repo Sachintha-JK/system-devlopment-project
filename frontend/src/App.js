@@ -13,8 +13,10 @@ import Spayments from './page/Supplier/Spayments';
 import CusHome from './page/Customer/CusHome';
 import Orders from './page/Customer/Orders';
 import Cpayments from './page/Customer/Cpayments';
+import PendingOC from './page/Customer/PendingOrder';
 import BmanagerHome from './page/BranchManager/BmanagerHome';
 import BranchStock from './page/BranchManager/BranchStock';
+import AppointmentBM from './page/BranchManager/AppointmentBM';
 import Supply from './page/BranchManager/Supply';
 import AdminHome from './page/Admin/AdminHome';
 import SupRegister from './page/BranchManager/SupRegister';
@@ -61,7 +63,8 @@ function App() {
 <Route path='/stock' element={<Stock/>}></Route>
 <Route path='/pending' element={<PendingOrder/>}></Route>
 <Route path='/imagespice' element={<ImageSpice/>}></Route>
-
+<Route path='/pendingoc' element={<PendingOC/>}></Route>
+<Route path='/appointmentbm' element={<AppointmentBM/>}></Route>
 
 </Routes>
 

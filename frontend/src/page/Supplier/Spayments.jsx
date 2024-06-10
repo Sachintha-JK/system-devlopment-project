@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AccountNbar from '../../component/AccountNbar';
+import SupplierBar from '../../component/SupplierBar';
 import axios from 'axios';
 import moment from 'moment';
 import {
@@ -14,11 +14,19 @@ import {
   Typography,
   Card,
   CardContent,
+  TextField,
+  Button,
+  MenuItem
 } from '@mui/material';
 
 function Spayments() {
   const [supplies, setSupplies] = useState([]);
   const [supplierId, setSupplierId] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [totalPaid, setTotalPaid] = useState(0);
+  const [totalPending, setTotalPending] = useState(0);
+  const [totalPayment, setTotalPayment] = useState(0);
 
   const fetchSupplierId = async () => {
     try {
@@ -56,69 +64,155 @@ function Spayments() {
     }
   }, [supplierId]);
 
+  useEffect(() => {
+    calculateTotals();
+  }, [supplies, selectedMonth, selectedYear]);
+
+  const calculateTotals = () => {
+    let paid = 0;
+    let pending = 0;
+    let payment = 0;
+
+    supplies.forEach((supply) => {
+      if (
+        (!selectedMonth || moment(supply.Date).format('MM') === selectedMonth) &&
+        (!selectedYear || moment(supply.Date).format('YYYY') === selectedYear)
+      ) {
+        if (supply.Payment_Status === 0) {
+          pending += parseFloat(supply.Total_Value);
+        } else {
+          paid += parseFloat(supply.Total_Value);
+        }
+        payment += parseFloat(supply.Total_Value);
+      }
+    });
+
+    setTotalPaid(paid);
+    setTotalPending(pending);
+    setTotalPayment(payment);
+  };
+
+  // Extract unique years from supplies
+  const years = Array.from(new Set(supplies.map(supply => moment(supply.Date).format('YYYY'))));
+
   return (
     <div>
-      <AccountNbar />
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <Card sx={{ width: '50%', boxShadow: 3 }}>
-          <CardContent>
-            <Typography variant="h4" gutterBottom>
-              Payments
-            </Typography>
-          </CardContent>
-        </Card>
+      <SupplierBar />
+      
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, width: '80%' }}>
+        <TextField
+          label="Select Month"
+          variant="outlined"
+          select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          style={{ marginRight: '10px' }}
+        >
+          <MenuItem value="">All Months</MenuItem>
+          {[...Array(12).keys()].map(month => (
+            <MenuItem key={month + 1} value={(month + 1).toString().padStart(2, '0')}>
+              {moment(`${month + 1}`, 'MM').format('MMMM')}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Select Year"
+          variant="outlined"
+          select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
+        >
+          <MenuItem value="">All Years</MenuItem>
+          {years.map(year => (
+            <MenuItem key={year} value={year}>{year}</MenuItem>
+          ))}
+        </TextField>
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-        <TableContainer component={Paper} sx={{ width: '90%' }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Supply No</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                    <div>Spice Type</div>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div>Quantity</div>
-                      <div>(kg)</div>
-                    </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div>Value</div>
-                      <div>(LKR)</div>
-                    </Box>
-                  </Box>
-                </TableCell>
-                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Delivery Date</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Total Value (LKR)</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Payment Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {supplies.map((supply) => (
-                <TableRow key={supply.Supply_ID}>
-                  <TableCell>{supply.Supply_ID}</TableCell>
-                  <TableCell>
-                    {supply.Spices.split(',').map((item, index) => {
-                      const [name, qty, value] = item.split(' - ');
-                      return (
-                        <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ display: 'inline-block', width: '200px' }}>{name}</span>
-                          <span style={{ display: 'inline-block', width: '100px' }}>{qty}</span>
-                          <span>{value}</span>
-                        </Box>
-                      );
-                    })}
-                  </TableCell>
-                  <TableCell>{moment(supply.Date).format('MM/DD/YYYY')}</TableCell>
-                  <TableCell>{supply.Total_Value}</TableCell>
-                  <TableCell>{supply.Payment_Status === 0 ? 'Pending' : 'Paid'}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+
+      <Card sx={{ width: '100%', maxWidth: 600, backgroundColor: '#DDD', paddingLeft: '2rem', mt: 3, margin: '0 auto' }}>
+      <CardContent>
+        <Typography variant="h5" sx={{ mb: 2 }}>Payments</Typography>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem' }}>
+          <Typography sx={{ color: 'green' }}>
+            Total Paid: <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{totalPaid}</span>
+          </Typography>
+          <Typography sx={{ color: 'red' }}>
+            Total Pending: <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{totalPending}</span>
+          </Typography>
+          <Typography>
+            Total Payment: <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{totalPayment}</span>
+          </Typography>
+        </div>
+      </CardContent>
+    </Card>
+
+
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <TableContainer component={Paper} sx={{ mt: 3, width: '90%' }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Supply No</TableCell>
+              <TableCell>Spice Type</TableCell>
+              <TableCell>Quantity</TableCell>
+              <TableCell>Value</TableCell>
+              <TableCell>Delivery Date</TableCell>
+              <TableCell>Total Value (LKR)</TableCell>
+              <TableCell>Payment Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {supplies.map((supply) => {
+              const supplyMonth = moment(supply.Date).format('MM');
+              const supplyYear = moment(supply.Date).format('YYYY');
+
+              if (
+                (!selectedMonth || supplyMonth === selectedMonth) &&
+                (!selectedYear || supplyYear === selectedYear)
+              ) {
+                return (
+                  <TableRow key={supply.Supply_ID}>
+                    <TableCell>{supply.Supply_ID}</TableCell>
+                    <TableCell>
+                      {supply.Spices.split(',').map((item, index) => {
+                        const [name] = item.split(' - ');
+                        return (
+                          <div key={index}>{name}</div>
+                        );
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      {supply.Spices.split(',').map((item, index) => {
+                        const [, qty] = item.split(' - ');
+                        return (
+                          <div key={index}>{qty}</div>
+                        );
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      {supply.Spices.split(',').map((item, index) => {
+                        const [, , value] = item.split(' - ');
+                        return (
+                          <div key={index}>{value}</div>
+                        );
+                      })}
+                    </TableCell>
+                    <TableCell>{moment(supply.Date).format('MM/DD/YYYY')}</TableCell>
+                    <TableCell>{supply.Total_Value}</TableCell>
+                    <TableCell>{supply.Payment_Status === 0 ? 'Pending' : 'Paid'}</TableCell>
+                  </TableRow>
+                );
+              } else {
+                return null;
+              }
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
     </div>
   );
 }
 
 export default Spayments;
+
