@@ -13,8 +13,9 @@ function ManagerRegister() {
     const [email, setEmail] = useState('');
     const [branches, setBranches] = useState([]);
 
+    const [errors, setErrors] = useState({});
+
     useEffect(() => {
-        // Fetch branches from the backend
         const fetchBranches = async () => {
             try {
                 const response = await axios.get('http://localhost:8081/branches');
@@ -28,50 +29,89 @@ function ManagerRegister() {
         fetchBranches();
     }, []);
 
+    const validate = () => {
+        let tempErrors = {};
+        let isValid = true;
+
+        if (!userName.trim()) {
+            tempErrors.userName = "UserName is required.";
+            isValid = false;
+        } else if (userName.length > 20) {
+            tempErrors.userName = "UserName must be at most 20 characters long.";
+            isValid = false;
+        }
+
+        if (!password) {
+            tempErrors.password = "Password is required.";
+            isValid = false;
+        } else if (password.length < 8 || password.length > 12) {
+            tempErrors.password = "Password must be between 8 and 12 characters long.";
+            isValid = false;
+        }
+
+        if (!name.trim()) {
+            tempErrors.name = "Name is required.";
+            isValid = false;
+        } else if (name.length > 60) {
+            tempErrors.name = "Name must be at most 60 characters long.";
+            isValid = false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email.trim()) {
+            tempErrors.email = "Email is required.";
+            isValid = false;
+        } else if (!emailRegex.test(email)) {
+            tempErrors.email = "Email is not valid.";
+            isValid = false;
+        } else if (email.length > 50) {
+            tempErrors.email = "Email must be at most 50 characters long.";
+            isValid = false;
+        }
+
+        const contactRegex = /^0\d{9}$/;
+        if (!contactNumber) {
+            tempErrors.contactNumber = "Contact Number is required.";
+            isValid = false;
+        } else if (!contactRegex.test(contactNumber)) {
+            tempErrors.contactNumber = "Contact Number must start with '0' and be 10 digits long.";
+            isValid = false;
+        }
+
+        if (!branchId) {
+            tempErrors.branchId = "Branch is required.";
+            isValid = false;
+        }
+
+        setErrors(tempErrors);
+        return isValid;
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-    
-        if (!userName || !password || !name || !email || !contactNumber || !branchId) {
-            toast.error("Please fill in all fields.");
+
+        if (!validate()) {
+            toast.error("Please fix the errors in the form.");
             return;
         }
-    
-        console.log("Submitting form with data:", {
-            userName,
-            password,
-            name,
-            email,
-            contactNumber,
-            branchId
-        });
-    
+
         try {
             const userResponse = await axios.post('http://localhost:8081/user', {
                 User_Name: userName,
                 User_Type: 'Branch Manager',
                 Password: password,
             });
-    
+
             const userId = userResponse.data.User_ID;
-            console.log("User created with ID:", userId);
-    
-            console.log("Submitting branch manager data:", {
+
+            await axios.post('http://localhost:8081/branch_manager', {
                 Name: name,
                 Contact_Number: contactNumber,
                 Branch_ID: branchId,
                 User_ID: userId,
                 Email: email
             });
-    
-            const branchManagerResponse = await axios.post('http://localhost:8081/branch_manager', {
-                Name: name,
-                Contact_Number: contactNumber,
-                Branch_ID: branchId,
-                User_ID: userId,
-                Email: email
-            });
-    
-            console.log("Branch manager response:", branchManagerResponse.data);
+
             toast.success("Branch Manager registered successfully!");
             clearForm();
         } catch (error) {
@@ -79,7 +119,6 @@ function ManagerRegister() {
             console.error('Error:', error);
         }
     };
-    
 
     const clearForm = () => {
         setUserName('');
@@ -88,6 +127,7 @@ function ManagerRegister() {
         setContactNumber('');
         setBranchId('');
         setEmail('');
+        setErrors({});
     };
 
     return (
@@ -108,6 +148,8 @@ function ManagerRegister() {
                             fullWidth
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            error={!!errors.name}
+                            helperText={errors.name}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -116,6 +158,8 @@ function ManagerRegister() {
                             fullWidth
                             value={userName}
                             onChange={(e) => setUserName(e.target.value)}
+                            error={!!errors.userName}
+                            helperText={errors.userName}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -125,6 +169,8 @@ function ManagerRegister() {
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            error={!!errors.password}
+                            helperText={errors.password}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -133,6 +179,8 @@ function ManagerRegister() {
                             fullWidth
                             value={contactNumber}
                             onChange={(e) => setContactNumber(e.target.value)}
+                            error={!!errors.contactNumber}
+                            helperText={errors.contactNumber}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -141,6 +189,8 @@ function ManagerRegister() {
                             fullWidth
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            error={!!errors.email}
+                            helperText={errors.email}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -149,6 +199,8 @@ function ManagerRegister() {
                             fullWidth
                             value={branchId}
                             onChange={(e) => setBranchId(e.target.value)}
+                            error={!!errors.branchId}
+                            displayEmpty
                         >
                             <MenuItem value="">Select Branch</MenuItem>
                             {branches.map(branch => (

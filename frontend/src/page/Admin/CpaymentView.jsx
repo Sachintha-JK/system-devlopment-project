@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment';
+import ProfileBar from '../../component/ProfileBar';
+import AdminNBar from '../../component/AdminNBar';
+
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Checkbox, Card, CardContent, TextField } from '@mui/material';
 
 function ViewOrders() {
@@ -43,14 +46,12 @@ function ViewOrders() {
   );
 
   return (
-    <Box sx={{ margin: '50px' }}>
-      <Card variant="outlined">
-        <CardContent>
-          <Typography variant="h4" align="center" gutterBottom>
-            Customer Orders
-          </Typography>
-        </CardContent>
-      </Card>
+    <div>
+      <div><ProfileBar pageName="Customer payment" /></div>
+      <div style={{ display: 'flex' }}>
+        <div><AdminNBar /></div>
+        <div style={{ flexGrow: 1 }}></div>
+    <Box >
       
       <TextField
         fullWidth
@@ -132,6 +133,8 @@ function ViewOrders() {
         </CardContent>
       </Card>
     </Box>
+    </div>
+    </div>
   );
 }
 

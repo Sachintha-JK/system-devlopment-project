@@ -95,9 +95,12 @@ function Cpayments() {
                   <TableCell>{moment(customer_order.Deliver_Date).format('MM/DD/YYYY')}</TableCell>
                   <TableCell>{customer_order.Total_Value}</TableCell>
                   <TableCell>
-  {customer_order.Accept_Status === 0 ? 'Rejected' : 
-   (customer_order.Accept_Status === 1 ? 'Accepted' : 'Pending')}
+  {customer_order.Accept_Status === 0 ? 'Rejected' :
+    customer_order.Accept_Status === 1 ? 'Accepted' :
+      customer_order.Process === 'No' && customer_order.Accept_Status === 10 ? 'No Response' :
+        'Pending'}
 </TableCell>
+
 
                 </TableRow>
               ))}

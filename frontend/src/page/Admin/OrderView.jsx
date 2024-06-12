@@ -3,6 +3,8 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
 import moment from 'moment';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
+import ProfileBar from '../../component/ProfileBar';
+import AdminNBar from '../../component/AdminNBar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 function OCalendar() {
@@ -71,6 +73,11 @@ function OCalendar() {
 
   return (
     <div>
+    <div><ProfileBar pageName="Calendar" /></div>
+    <div style={{ display: 'flex' }}>
+      <div><AdminNBar /></div>
+      <div style={{ flexGrow: 1 }}></div>
+
      
 
       <div style={{ textAlign: 'center', padding: '20px', width: 'fit-content', margin: 'auto' }}>
@@ -134,6 +141,7 @@ function OCalendar() {
 
         </Modal>
       )}
+    </div>
     </div>
   );
 }

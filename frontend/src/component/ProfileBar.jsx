@@ -26,7 +26,7 @@ export default function ButtonAppBar({pageName}) {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
            {pageName}
           </Typography>
-          <Button color="inherit">Login</Button>
+          <Button color="inherit">LogOut</Button>
         </Toolbar>
       </AppBar>
     </Box>

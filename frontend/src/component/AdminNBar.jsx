@@ -3,6 +3,8 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome, faUser, faClipboardList, faBoxes, faDollarSign, faBoxOpen, faImage } from '@fortawesome/free-solid-svg-icons';
 
 function BasicExample() {
   const [showRegister, setShowRegister] = useState(false);
@@ -20,10 +22,6 @@ function BasicExample() {
 
   const toggleInventory = () => {
     setShowInventory(!showInventory);
-  };
-
-  const toggleChange = () => {
-    setShowChange(!showChange);
   };
 
   const linkStyle = { margin: '20px 0', marginLeft: '30px', color: 'white', fontSize: '18px' };
@@ -64,9 +62,11 @@ function BasicExample() {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="flex-column justify-content-between w-100" style={{ height: '100vh' }}>
               <div>
-                <Nav.Link href="/" style={linkStyle}>Home</Nav.Link>
+                <Nav.Link href="/" style={linkStyle}>
+                  <FontAwesomeIcon icon={faHome} /> Home
+                </Nav.Link>
                 <Nav.Link style={linkStyle} onClick={toggleRegister} className="nav-dropdown-link">
-                  Users <span className={`arrow ${showRegister ? 'up' : 'down'}`}></span>
+                  <FontAwesomeIcon icon={faUser} /> Users <span className={`arrow ${showRegister ? 'up' : 'down'}`}></span>
                 </Nav.Link>
                 {showRegister && (
                   <>
@@ -75,9 +75,11 @@ function BasicExample() {
                     <Nav.Link href="/ManagerRegister" style={dropdownItemStyle}>Staff</Nav.Link>
                   </>
                 )}
-                <Nav.Link href="/viewappointment" style={linkStyle}>Appointment</Nav.Link>
+                <Nav.Link href="/viewappointment" style={linkStyle}>
+                  <FontAwesomeIcon icon={faClipboardList} /> Appointment
+                </Nav.Link>
                 <Nav.Link style={linkStyle} onClick={toggleOrders} className="nav-dropdown-link">
-                  Orders <span className={`arrow ${showOrders ? 'up' : 'down'}`}></span>
+                  <FontAwesomeIcon icon={faBoxes} /> Orders <span className={`arrow ${showOrders ? 'up' : 'down'}`}></span>
                 </Nav.Link>
                 {showOrders && (
                   <>
@@ -86,7 +88,7 @@ function BasicExample() {
                   </>
                 )}
                 <Nav.Link style={linkStyle} onClick={toggleInventory} className="nav-dropdown-link">
-                 Payment <span className={`arrow ${showInventory ? 'up' : 'down'}`}></span>
+                  <FontAwesomeIcon icon={faDollarSign} /> Payment <span className={`arrow ${showInventory ? 'up' : 'down'}`}></span>
                 </Nav.Link>
                 {showInventory && (
                   <>
@@ -94,8 +96,12 @@ function BasicExample() {
                     <Nav.Link href="/cpaymentview" style={dropdownItemStyle}>Customer</Nav.Link>
                   </>
                 )}
-                <Nav.Link href="/stock" style={linkStyle}>Stock</Nav.Link>
-                <Nav.Link href="/imagespice" style={linkStyle}>Product</Nav.Link>
+                <Nav.Link href="/stock" style={linkStyle}>
+                  <FontAwesomeIcon icon={faBoxOpen} /> Stock
+                </Nav.Link>
+                <Nav.Link href="/imagespice" style={linkStyle}>
+                  <FontAwesomeIcon icon={faImage} /> Spices
+                </Nav.Link>
               </div>
             </Nav>
           </Navbar.Collapse>

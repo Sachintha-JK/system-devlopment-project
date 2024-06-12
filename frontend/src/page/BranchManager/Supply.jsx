@@ -11,15 +11,20 @@ function Supply() {
   const [confirmationModal, setConfirmationModal] = useState(false);
   const [selectedSupplyId, setSelectedSupplyId] = useState(null);
 
+  const user = JSON.parse(localStorage.getItem("user"))
+  
+  
+  const fetchSupplyDetails = async () => {
+    const User_ID = user.User_ID
+    try {
+      const response = await axios.get(`http://localhost:8081/supply_details`);
+      console.log(response);
+      setSupplyDetails(response.data);
+    } catch (error) {
+      console.error('Error fetching supply details:', error);
+    }
+  };
   useEffect(() => {
-    const fetchSupplyDetails = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8081/supply_details`);
-        setSupplyDetails(response.data);
-      } catch (error) {
-        console.error('Error fetching supply details:', error);
-      }
-    };
 
     fetchSupplyDetails();
   }, []);

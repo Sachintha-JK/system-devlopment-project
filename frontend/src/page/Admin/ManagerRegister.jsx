@@ -3,6 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
 import AddManager from '../../component/AddManager';
+import ProfileBar from '../../component/ProfileBar';
+import AdminNBar from '../../component/AdminNBar';
 
 function ManagerRegister() {
   const [managers, setManagers] = useState([]);
@@ -27,8 +29,12 @@ function ManagerRegister() {
   const handleCloseModal = () => setShowModal(false);
 
   return (
+    <div>
+    <div><ProfileBar pageName="Branch Manager" /></div>
+    <div style={{ display: 'flex' }}>
+      <div><AdminNBar /></div>
+      <div style={{ flexGrow: 1 }}></div>
     <div className="container mt-5">
-      <h2>Manager</h2>
       {error && <p className="text-danger">{error}</p>}
       <Button variant="primary" onClick={handleShowModal}>Add Manager</Button>
       <table className="table table-striped mt-3">
@@ -68,6 +74,7 @@ function ManagerRegister() {
         </Modal.Footer>
       </Modal>
     </div>
+    </div></div>
   );
 }
 

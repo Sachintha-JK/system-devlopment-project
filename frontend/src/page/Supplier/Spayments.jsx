@@ -106,7 +106,7 @@ function Spayments() {
           select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}
-          style={{ marginRight: '10px' }}
+          style={{ marginRight: '10px', width:'10rem' }}
         >
           <MenuItem value="">All Months</MenuItem>
           {[...Array(12).keys()].map(month => (
@@ -121,6 +121,7 @@ function Spayments() {
           select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
+          style={{ marginRight: '10px', width:'10rem' }}
         >
           <MenuItem value="">All Years</MenuItem>
           {years.map(year => (

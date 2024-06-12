@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Form } from "react-bootstrap"; // Removed 'Box', 'Tabs', 'Tab' from here
-import { Tabs, Tab, Box } from "@mui/material"; // Added 'Box' here
+import { Button, Form } from "react-bootstrap";
+import { Tabs, Tab, Box } from "@mui/material";
 import SupplierBar from "../../component/SupplierBar";
 import AppointmentS from "../../component/AppointmentS";
 
@@ -10,14 +10,18 @@ function Appointment() {
   const [supplierId, setSupplierId] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [spiceTypes, setSpiceTypes] = useState([]);
-  const [branches, setBranches] = useState([]); // State for branches
+  const [branches, setBranches] = useState([]);
   const [formData, setFormData] = useState({
     selecteddate: new Date().toISOString().split("T")[0],
     time: "",
     spices: [{ spiceId: "", spiceName: "", quantity: "" }],
-    branchId: "", // Add branchId to formData
+    branchId: "",
   });
   const [timeslots, settimeslots] = useState([]);
+  const [errors, setErrors] = useState({
+    selecteddate: "",
+    spices: [{ quantity: "" }],
+  });
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -122,6 +126,8 @@ function Appointment() {
 
   const handleSpiceChange = (index, field, value) => {
     const updatedSpices = [...formData.spices];
+    let updatedErrors = [...errors.spices];
+
     if (field === "spiceId") {
       const selectedSpice = spiceTypes.find(spice => spice.Spice_Name === value);
       updatedSpices[index] = {
@@ -132,7 +138,17 @@ function Appointment() {
     } else {
       updatedSpices[index][field] = value;
     }
+
+    if (field === "quantity") {
+      if (!/^\d+$/.test(value) || parseInt(value) <= 0 || value.length > 5) {
+        updatedErrors[index] = { quantity: "Quantity must be a positive integer with a maximum length of 5." };
+      } else {
+        updatedErrors[index] = { quantity: "" };
+      }
+    }
+
     setFormData({ ...formData, spices: updatedSpices });
+    setErrors({ ...errors, spices: updatedErrors });
   };
 
   const addSpiceField = () => {
@@ -143,14 +159,52 @@ function Appointment() {
         { spiceId: "", spiceName: "", quantity: "" },
       ],
     });
+    setErrors({
+      ...errors,
+      spices: [
+        ...errors.spices,
+        { quantity: "" },
+      ],
+    });
+  };
+
+  const handleDateChange = (e) => {
+    const selectedDate = e.target.value;
+    const today = new Date().toISOString().split("T")[0];
+    let dateError = "";
+
+    if (new Date(selectedDate) < new Date(today)) {
+      dateError = "Date must be today or a future date.";
+    }
+
+    setFormData({ ...formData, selecteddate: selectedDate });
+    setErrors({ ...errors, selecteddate: dateError });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!supplierId) {
       console.error("Supplier ID is not available");
       return;
     }
+
+    const hasErrors = formData.spices.some((spice, index) => {
+      const quantityError = !/^\d+$/.test(spice.quantity) || parseInt(spice.quantity) <= 0 || spice.quantity.length > 5
+        ? "Quantity must be a positive integer with a maximum length of 5."
+        : "";
+      if (quantityError) {
+        const updatedErrors = [...errors.spices];
+        updatedErrors[index] = { quantity: quantityError };
+        setErrors({ ...errors, spices: updatedErrors });
+      }
+      return !!quantityError;
+    });
+
+    if (errors.selecteddate || hasErrors) {
+      return;
+    }
+
     const description = formData.spices
       .map((spice) => `${spice.spiceName || "undefined"}-${spice.quantity}`)
       .join(", ");
@@ -162,13 +216,17 @@ function Appointment() {
         time: formData.time,
         spices: formData.spices,
         description,
-        branchId: formData.branchId, // Include branchId in the request
+        branchId: formData.branchId,
       });
       setFormData({
         selecteddate: new Date().toISOString().split("T")[0],
         time: "",
         spices: [{ spiceId: "", spiceName: "", quantity: "" }],
-        branchId: "", // Reset branchId
+        branchId: "",
+      });
+      setErrors({
+        selecteddate: "",
+        spices: [{ quantity: "" }],
       });
       fetchSupplierAppointments();
     } catch (error) {
@@ -196,11 +254,13 @@ function Appointment() {
                   type="date"
                   placeholder="Select the Date"
                   value={formData.selecteddate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, selecteddate: e.target.value })
-                  }
+                  onChange={handleDateChange}
                   required
+                  isInvalid={!!errors.selecteddate}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.selecteddate}
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="mb-3" controlId="formBasicTime">
                 <Form.Label>Time</Form.Label>
@@ -265,7 +325,11 @@ function Appointment() {
                         handleSpiceChange(index, "quantity", e.target.value)
                       }
                       required
+                      isInvalid={!!errors.spices[index]?.quantity}
                     />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.spices[index]?.quantity}
+                    </Form.Control.Feedback>
                   </div>
                 ))}
                 <Button variant="secondary" onClick={addSpiceField}>

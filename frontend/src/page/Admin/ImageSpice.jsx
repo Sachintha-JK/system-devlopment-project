@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Button, Modal, Form } from 'react-bootstrap'; // Import Form from react-bootstrap
+import ProfileBar from '../../component/ProfileBar';
+import AdminNBar from '../../component/AdminNBar';
 
 function Stock() {
   const [spices, setSpices] = useState([]);
@@ -72,7 +74,10 @@ function Stock() {
 
   return (
     <div>
-      <h1 style={{ textAlign: 'center' }}>Spice Stock</h1>
+    <div><ProfileBar pageName="Spices" /></div>
+    <div style={{ display: 'flex' }}>
+      <div><AdminNBar /></div>
+      <div style={{ flexGrow: 1 }}></div>
       <Form>
         <Form.Group controlId="formSpiceName">
           <Form.Label>Spice Name</Form.Label>
@@ -149,6 +154,7 @@ function Stock() {
           ))}
         </tbody>
       </Table>
+    </div>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import moment from 'moment';
+import ProfileBar from '../../component/ProfileBar';
+import AdminNBar from '../../component/AdminNBar';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
 function SpaymentView() {
@@ -22,6 +24,12 @@ function SpaymentView() {
   };
 
   return (
+    <div>
+    <div><ProfileBar pageName="Collection Details" /></div>
+    <div style={{ display: 'flex' }}>
+      <div><AdminNBar /></div>
+      <div style={{ flexGrow: 1 }}></div>
+
     <Box sx={{ margin: '50px' }}>
       {/* Center-align the header */}
       <Typography variant="h4" align="center" gutterBottom>
@@ -59,6 +67,7 @@ function SpaymentView() {
         </Table>
       </TableContainer>
     </Box>
+    </div></div>
   );
 }
 

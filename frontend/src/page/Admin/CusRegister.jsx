@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, Container, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import AddCustomer from '../../component/AddCustomer';
 import EditCustomer from '../../component/EditCustomer';
+import ProfileBar from '../../component/ProfileBar';
+import AdminNBar from '../../component/AdminNBar';
 import axios from 'axios';
 
 function CusRegister() {
@@ -76,9 +78,14 @@ function CusRegister() {
   };
 
   return (
+    <div>
+    <div><ProfileBar pageName="Customer" /></div>
+    <div style={{ display: 'flex' }}>
+      <div><AdminNBar /></div>
+      <div style={{ flexGrow: 1 }}></div>
     <Container>
-      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Customers</h1>
 
+<br/>
       <TextField
   label="Search by Company Name"
   size="small"
@@ -131,6 +138,7 @@ function CusRegister() {
       {showPopup && <AddCustomer handleClose={handleClose} customers={customers} />}
       {showEditModal && <EditCustomer customer={selectedCustomer} handleClose={handleCloseEditModal} />}
     </Container>
+    </div></div>
   );
 }
 
