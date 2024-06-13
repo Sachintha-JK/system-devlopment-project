@@ -8,8 +8,64 @@ function EditCustomerForm({ customer, handleClose }) {
   const [email, setEmail] = useState(customer.Email);
   const [companyName, setCompanyName] = useState(customer.Company_Name);
 
+  const [errors, setErrors] = useState({
+    name: '',
+    contactNumber: '',
+    email: '',
+    companyName: ''
+  });
+
+  const validateName = (name) => {
+    if (!/^[A-Za-z\s]+$/.test(name)) {
+      return 'Name can only contain letters.';
+    }
+    if (name.length > 40) {
+      return 'Name can be a maximum of 40 characters.';
+    }
+    return '';
+  };
+
+  const validateContactNumber = (number) => {
+    if (!/^0\d{9}$/.test(number)) {
+      return 'Contact number must be 10 digits and start with 0.';
+    }
+    return '';
+  };
+
+  const validateEmail = (email) => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return 'Invalid email address.';
+    }
+    return '';
+  };
+
+  const validateCompanyName = (name) => {
+    if (name.length > 50) {
+      return 'Company name can be a maximum of 50 characters.';
+    }
+    return '';
+  };
+
+  const validateForm = () => {
+    const newErrors = {
+      name: validateName(name),
+      contactNumber: validateContactNumber(contactNumber),
+      email: validateEmail(email),
+      companyName: validateCompanyName(companyName)
+    };
+
+    setErrors(newErrors);
+
+    // Return true if no errors
+    return Object.values(newErrors).every(error => error === '');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       // Make API call to update customer data
@@ -49,6 +105,8 @@ function EditCustomerForm({ customer, handleClose }) {
                 variant="outlined"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                error={!!errors.name}
+                helperText={errors.name}
               />
             </Grid>
             <Grid item xs={12}>
@@ -58,6 +116,8 @@ function EditCustomerForm({ customer, handleClose }) {
                 variant="outlined"
                 value={contactNumber}
                 onChange={(e) => setContactNumber(e.target.value)}
+                error={!!errors.contactNumber}
+                helperText={errors.contactNumber}
               />
             </Grid>
             <Grid item xs={12}>
@@ -67,6 +127,8 @@ function EditCustomerForm({ customer, handleClose }) {
                 variant="outlined"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                error={!!errors.email}
+                helperText={errors.email}
               />
             </Grid>
             <Grid item xs={12}>
@@ -76,6 +138,8 @@ function EditCustomerForm({ customer, handleClose }) {
                 variant="outlined"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
+                error={!!errors.companyName}
+                helperText={errors.companyName}
               />
             </Grid>
             <Grid item xs={12}>

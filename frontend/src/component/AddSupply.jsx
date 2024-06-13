@@ -10,6 +10,10 @@ function CusPayment() {
   const [formFields, setFormFields] = useState([{ spice: '', quantity: '' }]);
   const [supplyValue, setSupplyValue] = useState(0);
   const [contactNumber, setContactNumber] = useState('');
+  const [errors, setErrors] = useState({
+    contactNumber: '',
+    quantity: ''
+  });
 
   useEffect(() => {
     const fetchSpices = async () => {
@@ -50,14 +54,18 @@ function CusPayment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const supplyDate = moment().format('YYYY-MM-DD');
-    
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const response = await axios.get('http://localhost:8081/find_supplier', { params: { contact: contactNumber } });
       const supplierId = response.data.supplier.Supplier_ID;
 
       const supplyItems = formFields.map(field => {
         const spice = spices.find(s => s.Spice_Name === field.spice);
-        const quantity = parseInt(field.quantity);
+        const quantity = parseFloat(field.quantity);
         return {
           Spice_ID: spice.Spice_ID,
           Quantity: quantity,
@@ -90,6 +98,29 @@ function CusPayment() {
     }
   };
 
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      contactNumber: '',
+      quantity: ''
+    };
+
+    if (!/^[0-9]{10}$/.test(contactNumber)) {
+      newErrors.contactNumber = 'Contact number must be 10 digits and start with 0.';
+      isValid = false;
+    }
+
+    formFields.forEach((field, index) => {
+      if (!/^-?\d*\.?\d+$/.test(field.quantity) || parseFloat(field.quantity) <= 0) {
+        newErrors.quantity = `Quantity must be a positive number greater than 0.`;
+        isValid = false;
+      }
+    });
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   return (
     <div style={{ backgroundColor: 'white', padding: '20px' }}>
       <br />
@@ -108,6 +139,8 @@ function CusPayment() {
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
               required
+              error={!!errors.contactNumber}
+              helperText={errors.contactNumber}
             />
           </FormControl>
 
@@ -141,6 +174,8 @@ function CusPayment() {
                   value={field.quantity}
                   onChange={(e) => handleFormChange(index, e)}
                   required
+                  error={!!errors.quantity}
+                  helperText={errors.quantity}
                 />
               </FormControl>
 
@@ -168,4 +203,4 @@ function CusPayment() {
   );
 }
 
-export default CusPayment;
+export default CusPayment

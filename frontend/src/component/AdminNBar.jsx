@@ -75,7 +75,7 @@ function BasicExample() {
                     <Nav.Link href="/ManagerRegister" style={dropdownItemStyle}>Staff</Nav.Link>
                   </>
                 )}
-                <Nav.Link href="/viewappointment" style={linkStyle}>
+                <Nav.Link href="/appointmenta" style={linkStyle}>
                   <FontAwesomeIcon icon={faClipboardList} /> Appointment
                 </Nav.Link>
                 <Nav.Link style={linkStyle} onClick={toggleOrders} className="nav-dropdown-link">
@@ -99,9 +99,7 @@ function BasicExample() {
                 <Nav.Link href="/stock" style={linkStyle}>
                   <FontAwesomeIcon icon={faBoxOpen} /> Stock
                 </Nav.Link>
-                <Nav.Link href="/imagespice" style={linkStyle}>
-                  <FontAwesomeIcon icon={faImage} /> Spices
-                </Nav.Link>
+
               </div>
             </Nav>
           </Navbar.Collapse>

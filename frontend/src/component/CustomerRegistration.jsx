@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
 
-function AddSupplier({ show, handleClose, onSave, branchId, userID }) {
+function AddSupplier({ show, handleClose, onSave }) {
   const [name, setName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [address1, setAddress1] = useState('');
   const [address2, setAddress2] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [email, setEmail] = useState('');
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({
@@ -15,7 +17,9 @@ function AddSupplier({ show, handleClose, onSave, branchId, userID }) {
     address1: '',
     address2: '',
     userName: '',
-    password: ''
+    password: '',
+    companyName: '',
+    email: ''
   });
 
   const validateForm = () => {
@@ -26,7 +30,9 @@ function AddSupplier({ show, handleClose, onSave, branchId, userID }) {
       address1: '',
       address2: '',
       userName: '',
-      password: ''
+      password: '',
+      companyName: '',
+      email: ''
     };
 
     if (!name.trim()) {
@@ -73,6 +79,19 @@ function AddSupplier({ show, handleClose, onSave, branchId, userID }) {
       isValid = false;
     }
 
+    if (!companyName.trim()) {
+      newErrors.companyName = 'Company name cannot be empty.';
+      isValid = false;
+    }
+
+    if (!email.trim()) {
+      newErrors.email = 'Email cannot be empty.';
+      isValid = false;
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.email = 'Email format is invalid.';
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
   };
@@ -83,23 +102,38 @@ function AddSupplier({ show, handleClose, onSave, branchId, userID }) {
     }
 
     try {
-      const newSupplier = {
+      // Step 1: Register the user
+      const userResponse = await axios.post('http://localhost:8081/user', {
+        User_Name: userName,
+        User_Type: 'Supplier',
+        Password: password
+      });
+
+      const userId = userResponse.data.User_ID;
+
+      // Step 2: Register the customer with the User_ID
+      await axios.post('http://localhost:8081/customer', {
+        Company_Name: companyName,
+        Name: name,
+        Contact_Number: contactNumber,
+        Email: email,
+        User_ID: userId // Attach the User_ID
+      });
+
+      // Save the new supplier data
+      onSave({
         Name: name,
         Contact_Number: contactNumber,
         Address1: address1,
         Address2: address2,
-        Branch_ID: branchId,
-        User_Name: userName,
-        User_Type: 'Supplier',
-        Password: password,
-        A_User_ID: userID,
-      };
+        Company_Name: companyName,
+        Email: email,
+        User_ID: userId
+      });
 
-      const response = await axios.post('http://localhost:8081/suppliers', newSupplier);
-      onSave(response.data);
       handleClose();
     } catch (error) {
-      console.error('Error adding supplier:', error);
+      console.error('Error registering supplier:', error);
     }
   };
 
@@ -110,6 +144,11 @@ function AddSupplier({ show, handleClose, onSave, branchId, userID }) {
       </Modal.Header>
       <Modal.Body>
         <Form>
+          <Form.Group controlId="formCompanyName">
+            <Form.Label>Company Name</Form.Label>
+            <Form.Control type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+            <Form.Text className="text-danger">{errors.companyName}</Form.Text>
+          </Form.Group>
           <Form.Group controlId="formName">
             <Form.Label>Name</Form.Label>
             <Form.Control type="text" value={name} onChange={(e) => setName(e.target.value)} />
@@ -129,6 +168,11 @@ function AddSupplier({ show, handleClose, onSave, branchId, userID }) {
             <Form.Label>Address 2</Form.Label>
             <Form.Control type="text" value={address2} onChange={(e) => setAddress2(e.target.value)} />
             <Form.Text className="text-danger">{errors.address2}</Form.Text>
+          </Form.Group>
+          <Form.Group controlId="formEmail">
+            <Form.Label>Email</Form.Label>
+            <Form.Control type="text" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Form.Text className="text-danger">{errors.email}</Form.Text>
           </Form.Group>
           <Form.Group controlId="formUserName">
             <Form.Label>User Name</Form.Label>

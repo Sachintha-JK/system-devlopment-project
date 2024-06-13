@@ -19,14 +19,10 @@ function AppointmentTable() {
           throw new Error("User ID not found in local storage");
         }
 
-        const response = await axios.get(
-          `http://localhost:8081/supplier/${userId}`
-        );
+        const response = await axios.get(`http://localhost:8081/supplier/${userId}`);
         const supplierId = response.data.supplierId;
 
-        const appointmentsResponse = await axios.get(
-          `http://localhost:8081/appointment/${supplierId}`
-        );
+        const appointmentsResponse = await axios.get(`http://localhost:8081/appointment/${supplierId}`);
         setAppointments(appointmentsResponse.data.appointments);
       } catch (error) {
         console.error("Error fetching appointments:", error.message);
@@ -36,16 +32,29 @@ function AppointmentTable() {
     fetchSupplierAppointments();
   }, []);
 
+  const getApprovalColor = (approval) => {
+    switch (approval) {
+      case 1:
+        return { color: "blue" }; // Approved
+      case 10:
+        return { color: "darkgoldenrod" }; // Pending (dark yellow)
+      case 0:
+        return { color: "red" }; // Declined
+      default:
+        return {};
+    }
+  };
+
   return (
-    <TableContainer component={Paper} sx={{ marginLeft: "20px",maxWidth: 900 }}>
+    <TableContainer component={Paper} sx={{ marginLeft: "20px", maxWidth: 900 }}>
       <Table sx={{ maxWidth: 900 }} aria-label="appointments table">
         <TableHead>
           <TableRow>
-            <TableCell>Appointment ID</TableCell>
-            <TableCell>Date</TableCell>
-            <TableCell>Time</TableCell>
-            <TableCell>Spices</TableCell>
-            <TableCell>Approval</TableCell>
+            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>Appointment ID</TableCell>
+            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>Date</TableCell>
+            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>Time</TableCell>
+            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>Spices</TableCell>
+            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>Approval</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -54,8 +63,8 @@ function AppointmentTable() {
               <TableCell>{appointment.Appointment_ID}</TableCell>
               <TableCell>{moment(appointment.Selected_Date).format("MM/DD/YYYY")}</TableCell>
               <TableCell>{appointment.Time}</TableCell>
-              <TableCell> {appointment.Comment}  </TableCell>
-              <TableCell>
+              <TableCell>{appointment.Comment}</TableCell>
+              <TableCell style={getApprovalColor(appointment.Approval)}>
                 {appointment.Approval === 1
                   ? "Approved"
                   : appointment.Approval === 10

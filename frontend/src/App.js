@@ -27,8 +27,9 @@ import SpaymentView from './page/Admin/SpaymentView';
 import CpaymentView from './page/Admin/CpaymentView';
 import OrderView from './page/Admin/OrderView';
 import Stock from './page/Admin/Stock';
-import PendingOrder from './page/Admin/PendingOrder';
+import PendingOrder from './page/Admin/PendingOrder'; 
 import ImageSpice from './page/Admin/ImageSpice';
+import AppointmentA from './page/Admin/AppointmentA';
 
 
 
@@ -65,6 +66,7 @@ function App() {
 <Route path='/imagespice' element={<ImageSpice/>}></Route>
 <Route path='/pendingoc' element={<PendingOC/>}></Route>
 <Route path='/appointmentbm' element={<AppointmentBM/>}></Route>
+<Route path='/appointmenta' element={<AppointmentA/>}></Route>
 
 </Routes>
 

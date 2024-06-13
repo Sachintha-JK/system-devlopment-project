@@ -129,7 +129,7 @@ function Appointment() {
     let updatedErrors = [...errors.spices];
 
     if (field === "spiceId") {
-      const selectedSpice = spiceTypes.find(spice => spice.Spice_Name === value);
+      const selectedSpice = spiceTypes.find(spice => spice.Spice_Id === value);
       updatedSpices[index] = {
         ...updatedSpices[index],
         spiceId: value,
@@ -191,7 +191,7 @@ function Appointment() {
 
     const hasErrors = formData.spices.some((spice, index) => {
       const quantityError = !/^\d+$/.test(spice.quantity) || parseInt(spice.quantity) <= 0 || spice.quantity.length > 5
-        ? "Quantity must be a positive integer with a maximum length of 5."
+        ? "Quantity must be a positive value"
         : "";
       if (quantityError) {
         const updatedErrors = [...errors.spices];
@@ -318,7 +318,8 @@ function Appointment() {
                       ))}
                     </Form.Control>
                     <Form.Control
-                      type="text"
+                      type="number"
+                      min="1"  // Ensure only positive numbers
                       placeholder="Quantity"
                       value={spice.quantity}
                       onChange={(e) =>

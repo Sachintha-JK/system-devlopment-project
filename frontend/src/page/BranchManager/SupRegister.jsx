@@ -132,9 +132,7 @@ function ViewSupplier() {
                     <Button variant="contained" color="success" onClick={() => handleEdit(supplier)}>
                       Edit
                     </Button>
-                    <Button variant="contained" color="error" onClick={() => confirmDeactivate(supplier)}>
-                      Deactivate
-                    </Button>
+                  
                   </TableCell>
                 </TableRow>
               ))}
@@ -159,19 +157,7 @@ function ViewSupplier() {
           onSave={handleEditSave}
         />
       )}
-      <Modal open={showDeleteModal} onClose={cancelDeactivate}>
-        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '5px' }}>
-          <Typography variant="h6">Confirm Deactivation</Typography>
-          <Typography>Are you sure you want to deactivate this supplier?</Typography>
-          <div style={{ marginTop: '20px' }}>
-            <Button variant="contained" onClick={cancelDeactivate}>Cancel</Button>
-            <Button variant="contained" color="error" onClick={() => {
-              handleDeactivate(supplierToDelete);
-              cancelDeactivate(); // Closing modal after deactivation
-            }}>Deactivate</Button>
-          </div>
-        </div>
-      </Modal>
+      
     </div>
   );
 }

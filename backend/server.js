@@ -1584,7 +1584,44 @@ GROUP BY o.Order_ID, o.Deliver_Date, c.Company_Name, c.Name`;
   });
 });
 
-// Fetch customer details by ID
+// View Appointemnet Manager
+
+
+app.get("/manager_appointments", (req, res) => {
+  const sql = `
+    SELECT 
+      appointment.Supplier_ID,
+      supplier.Name AS Supplier_Name,
+      supplier.Contact_Number,
+      appointment.Selected_Date,
+      appointment.Time,
+      branch.Branch_Name,
+      appointment.Comment
+    FROM appointment
+    INNER JOIN supplier ON appointment.Supplier_ID = supplier.Supplier_ID
+    INNER JOIN branch ON appointment.Branch_ID = branch.Branch_ID;
+  `;
+
+  db.query(sql, (error, results) => {
+    if (error) {
+      res.status(500).send(error);
+      return;
+    }
+
+    // Map over results to format date and adjust keys
+    const formattedResults = results.map(result => ({
+      Supplier_ID: result.Supplier_ID,
+      Supplier_Name: result.Supplier_Name,
+      Contact_Number: result.Contact_Number,
+      Selected_Date: moment(result.Selected_Date).format('YYYY-MM-DD'), // Format date using moment.js
+      Time: result.Time,
+      Branch_Name: result.Branch_Name,
+      Comment: result.Comment
+    }));
+
+    res.json(formattedResults);
+  });
+});
 
 //-------------------------------------------------------------------------------------------------------
 
