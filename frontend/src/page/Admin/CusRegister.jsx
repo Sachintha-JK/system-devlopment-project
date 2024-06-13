@@ -7,7 +7,7 @@ import AdminNBar from '../../component/AdminNBar';
 import axios from 'axios';
 
 function CusRegister() {
-  const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(false); // Manage AddCustomer popup visibility
   const [customers, setCustomers] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +99,15 @@ function CusRegister() {
             style={{ width: '100%', marginBottom: '10px' }}
           />
 
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={() => setShowPopup(true)}
+            style={{ marginBottom: '20px' }}
+          >
+            Add Customer
+          </Button>
+
           {error && <p className="text-danger">{error}</p>}
 
           {!loading && !error && (
@@ -138,7 +147,7 @@ function CusRegister() {
             </TableContainer>
           )}
 
-          {showPopup && <AddCustomer handleClose={handleClose} customers={customers} />}
+          {showPopup && <AddCustomer handleClose={handleClose} />}
           {showEditModal && <EditCustomer customer={selectedCustomer} handleClose={handleCloseEditModal} />}
         </Container>
       </div>

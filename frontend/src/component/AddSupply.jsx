@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { FormControl, InputLabel, Select, MenuItem, TextField, Button, Tooltip } from '@mui/material';
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Button,
+  Tooltip
+} from '@mui/material';
 import axios from 'axios';
 import moment from 'moment';
 import { ToastContainer, toast } from 'react-toastify';
@@ -42,8 +50,8 @@ function CusPayment() {
 
   const calculateSupplyValue = (fields) => {
     let total = 0;
-    fields.forEach(field => {
-      const spice = spices.find(p => p.Spice_Name === field.spice);
+    fields.forEach((field) => {
+      const spice = spices.find((p) => p.Spice_Name === field.spice);
       if (spice && field.quantity) {
         total += spice.Buying_Price * field.quantity;
       }
@@ -60,22 +68,28 @@ function CusPayment() {
     }
 
     try {
-      const response = await axios.get('http://localhost:8081/find_supplier', { params: { contact: contactNumber } });
+      const response = await axios.get('http://localhost:8081/find_supplier', {
+        params: { contact: contactNumber }
+      });
       const supplierId = response.data.supplier.Supplier_ID;
 
-      const supplyItems = formFields.map(field => {
-        const spice = spices.find(s => s.Spice_Name === field.spice);
+      // Fetch Branch_ID of the branch manager
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userId = user ? user.User_ID : null;
+      const branchManagerResponse = await axios.get(
+        `http://localhost:8081/find_branch_manager/${userId}`
+      );
+      const branchId = branchManagerResponse.data.Branch_ID;
+
+      const supplyItems = formFields.map((field) => {
+        const spice = spices.find((s) => s.Spice_Name === field.spice);
         const quantity = parseFloat(field.quantity);
         return {
           Spice_ID: spice.Spice_ID,
           Quantity: quantity,
-          Value: quantity * spice.Buying_Price,
+          Value: quantity * spice.Buying_Price
         };
       });
-
-      // Retrieve User_ID from local storage
-      const user = JSON.parse(localStorage.getItem('user'));
-      const userId = user ? user.User_ID : null;
 
       const supplyData = {
         Supplier_ID: supplierId,
@@ -83,7 +97,8 @@ function CusPayment() {
         Contact_Number: contactNumber,
         supplyItems: supplyItems,
         supplyValue: supplyValue.toFixed(2),
-        User_ID: userId, // Include User_ID in the data sent to backend
+        User_ID: userId,
+        Branch_ID: branchId // Include Branch_ID in the data sent to backend
       };
 
       console.log('Supply data:', supplyData);
@@ -106,7 +121,8 @@ function CusPayment() {
     };
 
     if (!/^[0-9]{10}$/.test(contactNumber)) {
-      newErrors.contactNumber = 'Contact number must be 10 digits and start with 0.';
+      newErrors.contactNumber =
+        'Contact number must be 10 digits and start with 0.';
       isValid = false;
     }
 
@@ -129,7 +145,15 @@ function CusPayment() {
         <h1>New Supply</h1>
       </div>
 
-      <div style={{ margin: 'auto', border: '1px solid black', padding: '20px', width: 'fit-content', fontSize: '20px' }}>
+      <div
+        style={{
+          margin: 'auto',
+          border: '1px solid black',
+          padding: '20px',
+          width: 'fit-content',
+          fontSize: '20px'
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth sx={{ marginBottom: '20px' }}>
             <InputLabel id="contact-number-label">Contact Number</InputLabel>
@@ -139,7 +163,7 @@ function CusPayment() {
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
               required
-              error={!!errors.contactNumber}
+              error={!!errors.contactNumber              }
               helperText={errors.contactNumber}
             />
           </FormControl>
@@ -203,4 +227,5 @@ function CusPayment() {
   );
 }
 
-export default CusPayment
+export default CusPayment;
+

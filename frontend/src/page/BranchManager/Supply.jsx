@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Button, Checkbox, Modal, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper } from '@mui/material';
+import {
+  Container,
+  Button,
+  Checkbox,
+  Modal,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+} from '@mui/material';
 import AddSupply from '../../component/AddSupply';
 import BmNbar from '../../component/BmNbar';
 
@@ -11,11 +23,10 @@ function Supply() {
   const [confirmationModal, setConfirmationModal] = useState(false);
   const [selectedSupplyId, setSelectedSupplyId] = useState(null);
 
-  const user = JSON.parse(localStorage.getItem("user"))
-  
-  
+  const user = JSON.parse(localStorage.getItem('user'));
+
   const fetchSupplyDetails = async () => {
-    const User_ID = user.User_ID
+    const User_ID = user.User_ID;
     try {
       const response = await axios.get(`http://localhost:8081/supply_details`);
       console.log(response);
@@ -24,8 +35,8 @@ function Supply() {
       console.error('Error fetching supply details:', error);
     }
   };
-  useEffect(() => {
 
+  useEffect(() => {
     fetchSupplyDetails();
   }, []);
 
@@ -49,7 +60,9 @@ function Supply() {
 
   const handleConfirmPayment = async () => {
     const updatedSupplyDetails = [...supplyDetails];
-    const index = updatedSupplyDetails.findIndex(detail => detail.Supply_ID === selectedSupplyId);
+    const index = updatedSupplyDetails.findIndex(
+      (detail) => detail.Supply_ID === selectedSupplyId
+    );
     updatedSupplyDetails[index].Payment_Status = 1;
     updatedSupplyDetails[index].disabled = true;
     setSupplyDetails(updatedSupplyDetails);
@@ -58,10 +71,13 @@ function Supply() {
       const user = JSON.parse(localStorage.getItem('user'));
       const userId = user ? user.User_ID : null;
 
-      await axios.put(`http://localhost:8081/update_payment_status/${selectedSupplyId}`, {
-        Payment_Status: 1,
-        User_ID: userId
-      });
+      await axios.put(
+        `http://localhost:8081/update_payment_status/${selectedSupplyId}`,
+        {
+          Payment_Status: 1,
+          User_ID: userId,
+        }
+      );
     } catch (error) {
       console.error('Error updating payment status:', error);
     }
@@ -105,36 +121,65 @@ function Supply() {
       <BmNbar />
       <Container className="mt-5">
         <h1 style={{ textAlign: 'center' }}>Spice Collection Details</h1>
-        <Button variant="contained" onClick={handleAddSupplyClick} style={{ marginBottom: '20px' }}>
+        <Button
+          variant="contained"
+          onClick={handleAddSupplyClick}
+          style={{ marginBottom: '20px' }}
+        >
           Add Supply
         </Button>
         <TableContainer component={Paper}>
           <Table sx={{ fontSize: '1.2rem' }}>
             <TableHead>
               <TableRow>
-                <TableCell><b>ID</b></TableCell>
-                <TableCell><b>Supplier Name</b></TableCell>
-                <TableCell><b>Contact Number</b></TableCell>
-                <TableCell><b>Date</b></TableCell>
-                <TableCell><b>Spice Name</b></TableCell>
-                <TableCell><b>Quantity</b></TableCell>
-                <TableCell><b>Value</b></TableCell>
-                <TableCell><b>Payment</b></TableCell>
-                <TableCell><b>Payment Status</b></TableCell>
-                <TableCell><b>Added By</b></TableCell>
-                <TableCell><b>Paid By</b></TableCell>
+                <TableCell>
+                  <b>ID</b>
+                </TableCell>
+                <TableCell>
+                  <b>Supplier Name</b>
+                </TableCell>
+                <TableCell>
+                  <b>Contact Number</b>
+                </TableCell>
+                <TableCell>
+                  <b>Branch</b>
+                </TableCell>
+                <TableCell>
+                  <b>Date</b>
+                </TableCell>
+                <TableCell>
+                  <b>Spice Name</b>
+                </TableCell>
+                <TableCell>
+                  <b>Quantity</b>
+                </TableCell>
+                <TableCell>
+                  <b>Value</b>
+                </TableCell>
+                <TableCell>
+                  <b>Payment</b>
+                </TableCell>
+                <TableCell>
+                  <b>Payment Status</b>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {supplyDetails.map((detail, index) => (
                 <React.Fragment key={detail.Supply_ID}>
                   <TableRow>
-                    <TableCell onClick={() => handleSupplyIdClick(detail.Supply_ID)} style={{ cursor: 'pointer' }}>
+                    <TableCell
+                      onClick={() => handleSupplyIdClick(detail.Supply_ID)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       {detail.Supply_ID}
                     </TableCell>
                     <TableCell>{detail.Supplier_Name}</TableCell>
                     <TableCell>{detail.Contact_Number}</TableCell>
-                    <TableCell>{new Date(detail.Supply_Date).toLocaleDateString()}</TableCell>
+                    <TableCell>{detail.Branch_Name}</TableCell>
+                    <TableCell>
+                      {new Date(detail.Supply_Date).toLocaleDateString()}
+                    </TableCell>
                     <TableCell>{detail.Spice_Name}</TableCell>
                     <TableCell>{detail.Quantity}</TableCell>
                     <TableCell>{detail.Value}</TableCell>
@@ -146,13 +191,12 @@ function Supply() {
                         onClick={() => handleCheckboxClick(index, detail.Supply_ID)}
                       />
                     </TableCell>
-                    <TableCell>{detail.A_User_ID}</TableCell>
-                    <TableCell>{detail.P_User_ID}</TableCell>
                   </TableRow>
                   {selectedSupplyId === detail.Supply_ID && (
                     <TableRow>
                       <TableCell colSpan={12}>
-                        <strong>Additional Details:</strong> {detail.Other_Details}
+                        <strong>Additional Details:</strong>{' '}
+                        {detail.Other_Details}
                       </TableCell>
                     </TableRow>
                   )}
@@ -168,12 +212,27 @@ function Supply() {
         </Modal>
 
         {/* Confirmation Modal */}
-        <Modal open={confirmationModal} onClose={handleCloseConfirmationModal}>
+        <Modal
+          open={confirmationModal}
+          onClose={handleCloseConfirmationModal}
+        >
           <div style={{ backgroundColor: 'white', padding: '20px' }}>
             <h2>Confirm Payment</h2>
             <p>Are you sure you want to mark this supply as paid?</p>
-            <Button variant="contained" color="primary" onClick={handleConfirmPayment} style={{ marginRight: '10px' }}>Confirm</Button>
-            <Button variant="contained" onClick={handleCloseConfirmationModal}>Cancel</Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmPayment}
+              style={{ marginRight: '10px' }}
+            >
+              Confirm
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleCloseConfirmationModal}
+            >
+              Cancel
+            </Button>
           </div>
         </Modal>
       </Container>

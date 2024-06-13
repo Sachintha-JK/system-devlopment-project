@@ -106,7 +106,7 @@ const Footer = () => {
       <div style={copyrightStyle}>
         &copy; Copyright 2024 Vikum Spice Exports (Pvt) Ltd. All Rights Reserved.
         <br />
-        Developed by <a href="https://aghanims.com" style={{ color: '#fff' }}>Aghanims</a>
+       
       </div>
     </footer>
   );

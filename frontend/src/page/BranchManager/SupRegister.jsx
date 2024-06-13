@@ -116,6 +116,7 @@ function ViewSupplier() {
                 <TableCell><Typography variant="h6" fontWeight="bold">Name</Typography></TableCell>
                 <TableCell><Typography variant="h6" fontWeight="bold">Contact Number</Typography></TableCell>
                 <TableCell><Typography variant="h6" fontWeight="bold">Address</Typography></TableCell>
+                <TableCell><Typography variant="h6" fontWeight="bold">Branch</Typography></TableCell>
                 <TableCell><Typography variant="h6" fontWeight="bold">Manager Info</Typography></TableCell>
                 <TableCell><Typography variant="h6" fontWeight="bold">Actions</Typography></TableCell>
               </TableRow>
@@ -127,6 +128,7 @@ function ViewSupplier() {
                   <TableCell>{supplier.Name}</TableCell>
                   <TableCell>{supplier.Contact_Number}</TableCell>
                   <TableCell>{`${supplier.Address1}, ${supplier.Address2}`}</TableCell>
+                  <TableCell>{supplier.Branch_Name}</TableCell>
                   <TableCell>{supplier.Manager_Info}</TableCell>
                   <TableCell>
                     <Button variant="contained" color="success" onClick={() => handleEdit(supplier)}>
