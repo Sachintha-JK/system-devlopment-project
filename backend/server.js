@@ -514,16 +514,19 @@ app.get("/find_branch_manager/:userId", (req, res) => {
 // ------view supplier(branch manager)
 app.get("/suppliers", (req, res) => {
   const sql = `
-    SELECT 
-      supplier.Supplier_ID, 
-      supplier.Name, 
-      supplier.Contact_Number, 
-      supplier.Address1, 
-      supplier.Address2, 
-      CONCAT(branch_manager.Manager_ID, '-', branch_manager.Name) AS Manager_Info
-    FROM supplier
-    JOIN branch_manager ON supplier.A_User_ID = branch_manager.User_ID
-    WHERE supplier.Active_Status = 1;
+    SELECT
+  supplier.Supplier_ID,
+  supplier.Name,
+  supplier.Contact_Number,
+  supplier.Address1,
+  supplier.Address2,
+  branch.Branch_Name,
+  CONCAT(branch_manager.Manager_ID, '-', branch_manager.Name) AS Manager_Info
+FROM supplier
+JOIN branch ON supplier.Branch_ID = branch.Branch_ID
+JOIN branch_manager ON supplier.A_User_ID = branch_manager.User_ID
+WHERE supplier.Active_Status = 1;
+
   `;
 
   db.query(sql, (err, result) => {
@@ -700,7 +703,7 @@ app.put("/deactivate_supplier/:id", (req, res) => {
 app.get("/supply_details", (req, res) => {
   const sql = `
   SELECT
-    s.Supply_ID, s.Supplier_ID, s.Supply_Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status,
+    s.Supply_ID, s.Supplier_ID, s.Supply_Date, b.Branch_Name,s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status,
     su.Name AS Supplier_Name, su.Contact_Number, sp.Spice_Name AS Spice_Name,
     s.A_User_ID, s.P_User_ID
   FROM
@@ -711,6 +714,8 @@ app.get("/supply_details", (req, res) => {
     supplier su ON s.Supplier_ID = su.Supplier_ID
   INNER JOIN
     spice sp ON si.Spice_ID = sp.Spice_ID
+     INNER JOIN
+    branch b ON s.Branch_ID = b.Branch_ID
   `;
 
   db.query(sql, (err, result) => {
@@ -909,7 +914,25 @@ app.post("/appointment", (req, res) => {
 
 // GET appointments route
 // Route to view appointments for a branch manager
-app.get("/view_appointments_bm", (req, res) => {
+app.get('/get_branch_by_user/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT Branch_ID FROM branch_manager WHERE User_ID = ?';
+  
+  db.query(query, [userId], (err, result) => {
+    if (err) {
+      console.error('Error fetching Branch_ID:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Branch not found' });
+    }
+    res.json(result[0]);
+  });
+});
+
+// Get Appointments by Branch_ID
+app.get('/view_appointments_bm', (req, res) => {
+  const branchId = req.query.branchId;
   const query = `
     SELECT 
       appointment.Appointment_ID,
@@ -920,50 +943,39 @@ app.get("/view_appointments_bm", (req, res) => {
       appointment.Comment,
       appointment.Approval
     FROM 
-      appointment
+      appointment appointment
     JOIN 
       supplier ON appointment.Supplier_ID = supplier.Supplier_ID
     JOIN 
-      branch ON appointment.Branch_ID = branch.Branch_ID;
+      branch ON appointment.Branch_ID = branch.Branch_ID
+    WHERE
+      appointment.Branch_ID = ?;
   `;
-  console.log("Executing query:", query); // Add this line to log the executed query
-  db.query(query, (err, results) => {
+  console.log("Executing query:", query, "with branchId:", branchId);
+  db.query(query, [branchId], (err, results) => {
     if (err) {
       console.error("Error fetching appointments:", err);
       return res.status(500).json({ error: "Failed to fetch appointments" });
     }
-    console.log("Appointments fetched successfully:", results); // Add this line to log the fetched appointments
+    console.log("Appointments fetched successfully:", results);
     res.status(200).json(results);
   });
 });
+
 //*********************update appointment */
-let appointments = [
-  { Appointment_ID: 1, Approval: 10 },
-  { Appointment_ID: 2, Approval: 10 },
-  // Add other appointments here
-];
 
-app.post("/update_appointment", async (req, res) => {
+
+app.post('/update_appointment', (req, res) => {
   const { id, approval } = req.body;
-  console.log(`Received request to update appointment ${id} to ${approval}`);
-
-  try {
-    const [result] = await pool.query(
-      "UPDATE appointment SET Approval = ? WHERE Appointment_ID = ?",
-      [approval, id]
-    );
-
-    if (result.affectedRows > 0) {
-      console.log(`Appointment ${id} updated to ${approval}`);
-      res.sendStatus(200);
-    } else {
-      console.log(`Appointment ${id} not found`);
-      res.status(404).send("Appointment not found");
+  const query = 'UPDATE appointment SET Approval = ? WHERE Appointment_ID = ?';
+  db.query(query, [approval, id], (err) => {
+    if (err) {
+      console.error('Error updating appointment:', err.message);
+      res.status(500).send('Error updating appointment');
+      return;
     }
-  } catch (error) {
-    console.error("Error updating appointment:", error);
-    res.status(500).send("Internal Server Error");
-  }
+    res.send('Appointment updated successfully');
+  });
 });
 
 // Endpoint to view appointments
@@ -1013,23 +1025,24 @@ app.get("/spice_quantities/:branchId", (req, res) => {
 app.post("/add_supply", async (req, res) => {
   try {
     console.log("Received supply data:", req.body);
-    const { Supplier_ID, supplyItems, supplyValue, User_ID } = req.body;
+    const { Supplier_ID, supplyItems, supplyValue, User_ID, Branch_ID } = req.body;
     const Supply_Date = moment().format("YYYY-MM-DD");
-
+  
     console.log("Supply Date:", Supply_Date);
     console.log("Supplier_ID:", Supplier_ID);
     console.log("User_ID:", User_ID);
-
+    console.log("Branch_ID:", Branch_ID); // Log Branch_ID
+  
     const insertSupplyQuery =
-      "INSERT INTO supply (Supplier_ID, Supply_Date, Payment, A_User_ID) VALUES (?, ?, ?, ?)";
+      "INSERT INTO supply (Supplier_ID, Supply_Date, Payment, A_User_ID, Branch_ID) VALUES (?, ?, ?, ?, ?)";
     const insertSupplyItemQuery =
       "INSERT INTO supply_item (Supply_ID, Spice_ID, Quantity, Value) VALUES (?, ?, ?, ?)";
-
+  
     // Insert into supply table
     const supplyResult = await new Promise((resolve, reject) => {
       db.query(
         insertSupplyQuery,
-        [Supplier_ID, Supply_Date, supplyValue, User_ID],
+        [Supplier_ID, Supply_Date, supplyValue, User_ID, Branch_ID], // Include Branch_ID in the query
         (err, result) => {
           if (err) {
             console.error("Error inserting Supply:", err);
@@ -1040,10 +1053,10 @@ app.post("/add_supply", async (req, res) => {
         }
       );
     });
-
+  
     const Supply_ID = supplyResult.insertId;
     console.log("Generated Supply_ID:", Supply_ID);
-
+  
     // Insert into supply_item table for each item in the supplyItems array
     const supplyItemPromises = supplyItems.map((item) => {
       return new Promise((resolve, reject) => {
@@ -1064,7 +1077,7 @@ app.post("/add_supply", async (req, res) => {
         );
       });
     });
-
+  
     await Promise.all(supplyItemPromises);
     res.status(200).json({ message: "Supply placed successfully!" });
   } catch (error) {
@@ -1074,6 +1087,7 @@ app.post("/add_supply", async (req, res) => {
       .json({ error: "Failed to place supply", details: error.message });
   }
 });
+
 
 //------------------------------Find Supplier to add supply---------------------
 app.get("/find_supplier", (req, res) => {
@@ -1209,14 +1223,17 @@ app.get("/branches", (req, res) => {
 app.get("/supply_details", (req, res) => {
   const sql = `
   SELECT
-    s.Supply_ID, s.Supplier_ID, su.Name, s.Supply_Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status
+    s.Supply_ID, s.Supplier_ID, su.Name, b.Branch_Name, s.Supply_Date, s.Payment, si.Spice_ID, si.Quantity, si.Value, s.Payment_Status
   FROM
     supply s
   INNER JOIN
     supply_item si ON s.Supply_ID = si.Supply_ID
   INNER JOIN
     supplier su ON s.Supplier_ID = su.Supplier_ID
-  `;
+  INNER JOIN
+    branch b ON s.Branch_ID = b.Branch_ID
+`;
+
 
   db.query(sql, (err, result) => {
     if (err) {
