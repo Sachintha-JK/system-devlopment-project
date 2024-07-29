@@ -18,12 +18,13 @@ import { Link, useNavigate } from 'react-router-dom';
 const pages = ['Home','Payments', 'Place Order','Order Details']; // Change the display names
 const settings = [
     { label: 'Home', route: '/cushome' },
-  { label: 'Profile', route: '/profile' },
+  
   { label: 'Change Password', route: '/cpassword' },
   { label: 'Logout', route: '/logout' }
 ];
 
 function ResponsiveAppBar() {
+  
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [openProfileDialog, setOpenProfileDialog] = useState(false);
@@ -135,3 +136,4 @@ function ResponsiveAppBar() {
 }
 
 export default ResponsiveAppBar;
+ 

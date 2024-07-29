@@ -100,6 +100,7 @@ function BasicExample() {
                   <FontAwesomeIcon icon={faBoxOpen} /> Stock
                 </Nav.Link>
 
+                
               </div>
             </Nav>
           </Navbar.Collapse>

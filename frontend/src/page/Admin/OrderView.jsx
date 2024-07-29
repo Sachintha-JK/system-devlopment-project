@@ -116,8 +116,8 @@ function OCalendar() {
           <Modal.Body>
   <div style={{ border: '1px solid gray', padding: '10px', borderRadius: '5px' }}>
     <p><strong>Order ID:</strong> {selectedOrder.Order_ID}</p>
-    <p><strong>Name:</strong> {selectedOrder.name}</p> {/* Add Name */}
-    <p><strong>Company:</strong> {selectedOrder.company}</p> {/* Add Company_Name */}
+    <p><strong>Name:</strong> {selectedOrder.Name}</p> {/* Add Name */}
+    <p><strong>Company:</strong> {selectedOrder.Company_Name}</p> {/* Add Company_Name */}
     <p><strong>Spices:</strong></p>
     <ul>
       {selectedOrder.Products.split(',').map((item, index) => {

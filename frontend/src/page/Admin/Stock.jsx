@@ -159,7 +159,7 @@ function Stock() {
 
   return (
     <div>
-      <div><ProfileBar pageName="Calendar" /></div>
+      <div><ProfileBar pageName="Stock" /></div>
       <div style={{ display: 'flex' }}>
         <div><AdminNBar /></div>
         <div style={{ flexGrow: 1 }}></div>

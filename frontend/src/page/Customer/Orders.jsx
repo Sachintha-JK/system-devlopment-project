@@ -265,7 +265,7 @@ function CusPayment() {
                       <TextField
                         type="number"
                         name="quantity"
-                        label="Quantity"
+                        label="Quantity (kg)"
                         placeholder="Add the Quantity"
                         value={field.quantity}
                         onChange={(e) => handleFormChange(index, e)}

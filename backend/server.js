@@ -187,6 +187,25 @@ app.post("/change-password", (req, res) => {
     }
   });
 });
+//************************** */
+app.get('/user', (req, res) => {
+  const userName = req.query.UserName;
+  if (!userName) {
+    return res.status(400).json({ error: 'UserName query parameter is required' });
+  }
+
+  const query = 'SELECT COUNT(*) AS count FROM user WHERE User_Name = ?';
+  db.query(query, [userName], (err, result) => {
+    if (err) {
+      console.error('Error checking username:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    const userExists = result[0].count > 0;
+    res.json({ exists: userExists });
+  });
+});
+
+
 
 ///----------Register User----------------------------------------------------------------------------------------
 app.post("/user", async (req, res) => {
@@ -401,10 +420,11 @@ app.post("/plce_order", async (req, res) => {
 
 app.get("/customer_order/:customerId", (req, res) => {
   const customerId = req.params.customerId;
-  const sql = `SELECT o.Order_ID, o.Deliver_Date, ao.Payment,ao.Payment_Status,
+  const sql = `SELECT o.Order_ID, o.Deliver_Date, ao.Payment,ao.Payment_Status,c.Company_Name,c.Name,
   GROUP_CONCAT(CONCAT(s.Spice_Name, ' - ', os.Quantity, '  - ', os.Value, ' ')) AS Spices,
   SUM(os.Quantity * os.Value) AS Total_Value
 FROM customer_order o
+JOIN customer c ON c.Customer_ID = o.Order_ID
 JOIN order_spice os ON os.Order_ID = o.Order_ID
 JOIN accept_order ao ON ao.Order_ID = o.Order_ID
 JOIN spice s ON os.Spice_ID = s.Spice_ID

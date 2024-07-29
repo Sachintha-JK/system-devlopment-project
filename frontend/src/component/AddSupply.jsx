@@ -126,7 +126,7 @@ function CusPayment() {
       isValid = false;
     }
 
-    formFields.forEach((field, index) => {
+    formFields.forEach((field) => {
       if (!/^-?\d*\.?\d+$/.test(field.quantity) || parseFloat(field.quantity) <= 0) {
         newErrors.quantity = `Quantity must be a positive number greater than 0.`;
         isValid = false;
@@ -156,15 +156,17 @@ function CusPayment() {
       >
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth sx={{ marginBottom: '20px' }}>
-            <InputLabel id="contact-number-label">Contact Number</InputLabel>
             <TextField
               id="contact-number"
+              label="Contact Number"
               type="text"
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
               required
-              error={!!errors.contactNumber              }
+              error={!!errors.contactNumber}
               helperText={errors.contactNumber}
+              placeholder="Enter contact number"
+              InputLabelProps={{ shrink: true }}
             />
           </FormControl>
 
@@ -190,9 +192,9 @@ function CusPayment() {
               </FormControl>
 
               <FormControl className="flex-fill me-3" fullWidth>
-                <InputLabel id={`quantity-label-${index}`}>Quantity</InputLabel>
                 <TextField
                   id={`quantity-${index}`}
+                  label="Quantity"
                   type="number"
                   name="quantity"
                   value={field.quantity}
@@ -200,6 +202,9 @@ function CusPayment() {
                   required
                   error={!!errors.quantity}
                   helperText={errors.quantity}
+                  placeholder="Enter quantity"
+                  inputProps={{ min: 1, step: 0.1 }}
+                  InputLabelProps={{ shrink: true }}
                 />
               </FormControl>
 
@@ -228,4 +233,3 @@ function CusPayment() {
 }
 
 export default CusPayment;
-

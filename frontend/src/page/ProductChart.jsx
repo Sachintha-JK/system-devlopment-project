@@ -5,6 +5,8 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Hnbar from '../component/Hnbar';
+import Footer from '../component/Footer';
 
 function ProductChart() {
   const [spices, setSpices] = useState([]);
@@ -19,6 +21,7 @@ function ProductChart() {
 
   return (
     <div>
+        <div><Hnbar/></div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(3, 1fr)', gap: '20px', margin: '40px' }}>
         {spices.map(spice => (
           <Card key={spice.Spice_Name} sx={{ maxWidth: 345 }}>
@@ -35,14 +38,13 @@ function ProductChart() {
                 {spice.Description}
               </Typography>
             </CardContent>
-            <CardActions>
-              <Button size="small">Share</Button>
-              <Button size="small">Learn More</Button>
-            </CardActions>
+           
           </Card>
         ))}
       </div>
+      <div><Footer/></div>
     </div>
+    
   );
 }
 

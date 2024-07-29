@@ -206,7 +206,7 @@ function Appointment() {
     }
 
     const description = formData.spices
-      .map((spice) => `${spice.spiceName || "undefined"}-${spice.quantity}`)
+      .map((spice) => `${spice.spiceId || "undefined"}-${spice.quantity}`)
       .join(", ");
 
     try {

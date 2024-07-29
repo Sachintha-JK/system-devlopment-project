@@ -7,7 +7,7 @@ import { FaSearch } from 'react-icons/fa';
 
 function Hnbar() {
   return (
-    <div >
+    <div>
       <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
         <img src={BImage} alt="Your Image" style={{ height: '125px', width: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', top: '0', right: '0', padding: '10px', display: 'flex', alignItems: 'center' }}>
@@ -15,18 +15,15 @@ function Hnbar() {
           <input type="text" placeholder="Search..." style={{ padding: '5px', borderRadius: '5px', border: '1px solid #ccc' }} />
         </div>
       </div>
-     <Navbar style={{ backgroundColor: '#D2B48C' }} data-bs-theme="light">
+      <Navbar style={{ backgroundColor: '#D2B48C' }} data-bs-theme="light">
         <Container>
-        <Navbar.Brand style={{ fontSize: '1.5rem' }}>SpiceMart</Navbar.Brand>
+          <Navbar.Brand style={{ fontSize: '1.5rem' }}>SpiceMart</Navbar.Brand>
           <Nav className="me-auto">
-            
-          <Nav.Link href="/SupRegister" style={{ color: 'black' }}>Supplier</Nav.Link>
-                    <Nav.Link href="/supply" style={{ color: 'black' }}>Collection</Nav.Link>
-                    <Nav.Link href="/branchstock" style={{ color: 'black' }}>Availability</Nav.Link>
-                    <Nav.Link href="/appointmentbm" style={{ color: 'black' }}>Appointment</Nav.Link>
-            
-  
-           
+            <Nav.Link href="/SupRegister" style={{ color: 'black' }}>Supplier</Nav.Link>
+            <Nav.Link href="/supply" style={{ color: 'black' }}>Collection</Nav.Link>
+            <Nav.Link href="/branchstock" style={{ color: 'black' }}>Availability</Nav.Link>
+            <Nav.Link href="/appointmentbm" style={{ color: 'black' }}>Appointment</Nav.Link>
+            <Nav.Link href="/logout" style={{ color: 'black' }}>Logout</Nav.Link> {/* Added Logout link */}
           </Nav>
         </Container>
       </Navbar>

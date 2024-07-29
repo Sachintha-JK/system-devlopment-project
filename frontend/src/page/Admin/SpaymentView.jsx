@@ -51,7 +51,7 @@ function SpaymentView() {
                 {supplyDetails.map((supply) => (
                   <TableRow key={supply.Supply_ID}>
                     <TableCell sx={{ fontSize: '1rem' }}>{supply.Supply_ID}</TableCell>
-                    <TableCell sx={{ fontSize: '1rem' }}>{supply.Name}</TableCell>
+                    <TableCell sx={{ fontSize: '1rem' }}>{supply.Supplier_Name}</TableCell>
                     <TableCell sx={{ fontSize: '1rem' }}>{moment(supply.Supply_Date).format('YYYY-MM-DD')}</TableCell>
                     <TableCell sx={{ fontSize: '1rem' }}>{supply.Payment}</TableCell>
                     <TableCell sx={{ fontSize: '1rem' }}>{supply.Spice_ID}</TableCell>
