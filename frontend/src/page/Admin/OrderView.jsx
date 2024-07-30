@@ -114,11 +114,15 @@ function OCalendar() {
             <Modal.Title>Order Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+
+
   <div style={{ border: '1px solid gray', padding: '10px', borderRadius: '5px' }}>
     <p><strong>Order ID:</strong> {selectedOrder.Order_ID}</p>
     <p><strong>Name:</strong> {selectedOrder.Name}</p> {/* Add Name */}
     <p><strong>Company:</strong> {selectedOrder.Company_Name}</p> {/* Add Company_Name */}
     <p><strong>Spices:</strong></p>
+
+
     <ul>
       {selectedOrder.Products.split(',').map((item, index) => {
         const [name, qty, value] = item.split(' - ');
@@ -129,6 +133,8 @@ function OCalendar() {
         );
       })}
     </ul>
+
+    
     <p><strong>Total Payment:</strong> Rs {selectedOrder.Total_Payment}</p>
     <p><strong>Deliver Date:</strong> {moment(selectedOrder.Deliver_Date).format('MM/DD/YYYY')}</p>
   </div>

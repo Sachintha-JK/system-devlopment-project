@@ -29,6 +29,9 @@ function ManagerRegister() {
   const handleCloseModal = () => setShowModal(false);
 
   return (
+
+     
+
     <div>
     <div><ProfileBar pageName="Branch Manager" /></div>
     <div style={{ display: 'flex' }}>
@@ -36,7 +39,12 @@ function ManagerRegister() {
       <div style={{ flexGrow: 1 }}></div>
     <div className="container mt-5">
       {error && <p className="text-danger">{error}</p>}
+
+      {/*Call the AddManager component */}
+
       <Button variant="primary" onClick={handleShowModal}>Add Manager</Button>
+
+      {/*View Staff Details */}
       <table className="table table-striped mt-3">
         <thead>
           <tr>

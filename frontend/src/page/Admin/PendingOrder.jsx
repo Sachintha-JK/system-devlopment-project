@@ -21,7 +21,8 @@ function ViewPendingOrders() {
     } catch (error) {
       console.error('Error fetching orders:', error);
       setErrorMessage('Error fetching orders');
-      setTimeout(() => setErrorMessage(null), 3000); // Clear error message after 3 seconds
+      setTimeout(() => setErrorMessage(null), 3000); 
+      // Clear error message after 3 seconds
     }
   };
 
@@ -43,6 +44,7 @@ function ViewPendingOrders() {
         Process: isChecked ? 'Yes' : 'No',
       });
       console.log('Process status updated:', response.data);
+
       // Update selectedProcesses state
       setSelectedProcesses({
         ...selectedProcesses,
@@ -88,7 +90,8 @@ function ViewPendingOrders() {
         ? error.response.data.error 
         : 'Error updating status';
       setErrorMessage(errorMsg);
-      setTimeout(() => setErrorMessage(null), 3000); // Clear error message after 3 seconds
+      setTimeout(() => setErrorMessage(null), 3000); 
+      // Clear error message after 3 seconds
     }
 
     setIsLoading(false);
@@ -163,12 +166,18 @@ function ViewPendingOrders() {
                       value={selectedStatuses[customer_order.Order_ID] !== undefined ? selectedStatuses[customer_order.Order_ID] : ''}
                       onChange={(e) => handleStatusChange(customer_order.Order_ID, parseInt(e.target.value))}
                     >
+
+                      {/*Accept or Decline the Order*/ }
                       <option value="" disabled>Select</option>
                       <option value={1}>Accept</option>
                       <option value={0}>Decline</option>
                     </select>
                   </td>
                   <td>
+
+  {/*Would like to get the order, press the checkbox for acknowledgr the customer, 
+  that the order is processing*/ }
+
                   <input
   type="checkbox"
   checked={selectedProcesses[customer_order.Order_ID] || false}
@@ -177,6 +186,9 @@ function ViewPendingOrders() {
 />
 
                   </td>
+
+
+                    {/*Confirm the Order Status(Accept or Decline*/ }
                   <td>
                     <Button
                       onClick={() => handleConfirmStatusChange(customer_order.Order_ID, index)}

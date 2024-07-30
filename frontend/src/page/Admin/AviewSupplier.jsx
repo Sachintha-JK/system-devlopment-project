@@ -56,13 +56,15 @@ function Suppliers() {
             />
           </Box>
 
+             {/* Call the ADD SUPPLIER component*/}
+
           <Box sx={{ mb: 3, textAlign: 'left' }}> {/* Align to the left */}
             <Button variant="contained" color="primary" onClick={() => setShowAddModal(true)}>
               Add Supplier
             </Button>
           </Box>
 
-          {/* Table container */}
+          {/* Table container with supplier Deatils */}
           <TableContainer component={Paper}>
             <Table>
               <TableHead sx={{ backgroundColor: '#000' }}>

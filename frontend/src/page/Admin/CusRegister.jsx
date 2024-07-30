@@ -98,7 +98,7 @@ function CusRegister() {
             onChange={handleSearchChange}
             style={{ width: '100%', marginBottom: '10px' }}
           />
-
+         {/*ADD CUSTOMER component is called */}
           <Button 
             variant="contained" 
             color="primary" 
@@ -107,6 +107,9 @@ function CusRegister() {
           >
             Add Customer
           </Button>
+          
+
+          {/*Customer details are shown */}
 
           {error && <p className="text-danger">{error}</p>}
 
@@ -122,6 +125,8 @@ function CusRegister() {
                     <TableCell>Action</TableCell>
                   </TableRow>
                 </TableHead>
+
+
                 <TableBody>
                   {filteredCustomers.map((customer) => (
                     <TableRow key={customer.Customer_ID}>
@@ -130,7 +135,13 @@ function CusRegister() {
                       <TableCell>{customer.Contact_Number}</TableCell>
                       <TableCell>{customer.Email}</TableCell>
                       <TableCell>
+
+                         {/*Call the EDIT component */}
+
                         <Button variant="contained" color="primary" onClick={() => handleEdit(customer)}>Edit</Button>
+                        
+                           {/*Call the DEACTIVATE component */}
+
                         <Button
                           variant={customer.Active_Status === 1 ? "contained" : "outlined"}
                           color={customer.Active_Status === 1 ? "secondary" : "primary"}
@@ -139,6 +150,8 @@ function CusRegister() {
                         >
                           {customer.Active_Status === 1 ? "Deactivate" : "Activate"}
                         </Button>
+
+
                       </TableCell>
                     </TableRow>
                   ))}

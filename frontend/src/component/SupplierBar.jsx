@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -16,12 +15,11 @@ import AdbIcon from '@mui/icons-material/Adb';
 import Button from '@mui/material/Button';
 import { Link, useNavigate } from 'react-router-dom';
 
-const pages = ['Home','Appointment', 'Payments','Price List']; // Change the display names
+const pages = ['Home', 'Appointment', 'Payments', 'Price List']; // Change the display names
 const settings = [
-    { label: 'Home', route: '/suphome' },
-  { label: 'Profile', route: '/profile' },
+  { label: 'Home', route: '/suphome' },
   { label: 'Change Password', route: '/cpassword' },
-  { label: 'Logout', route: '/logout' }
+  { label: 'Logout', route: null }, // Set route to null for Logout
 ];
 
 function ResponsiveAppBar() {
@@ -58,9 +56,20 @@ function ResponsiveAppBar() {
     setOpenProfileDialog(false);
   };
 
+  // Define the handleLogout function
+  const handleLogout = () => {
+    // Clear user details from local storage
+    localStorage.removeItem('user');
+    // Redirect to login page
+    navigate('/login');
+  };
+
   return (
     <AppBar position="static" sx={{ backgroundColor: '#333', color: '#fff' }}>
-      <Toolbar disableGutters sx={{ marginLeft: '30px', marginRight: '30px', backgroundColor: '#333', color: '#fff' }}>
+      <Toolbar
+        disableGutters
+        sx={{ marginLeft: '30px', marginRight: '30px', backgroundColor: '#333', color: '#fff' }}
+      >
         <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
         <Typography
           variant="h6"
@@ -81,21 +90,30 @@ function ResponsiveAppBar() {
         </Typography>
 
         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-  {pages.map((page, index) => (
-    <Button
-      key={index}
-      component={Link}
-      to={page === 'Appointments' ? '/appointment' :(page === 'Home' ? '/suphome' : (page === 'Payments' ? '/spayments' : (page === 'Price List' ? '/pricelevel' : (page === 'Order Details' ? '/pendingoc' : `/${page.toLowerCase()}`))))}
-      sx={{ my: 2, color: '#fff', display: 'block' }}
-      onClick={handleCloseNavMenu}
-    >
-      {page}
-    </Button>
-  ))}
-</Box>
-
-
-        
+          {pages.map((page, index) => (
+            <Button
+              key={index}
+              component={Link}
+              to={
+                page === 'Appointments'
+                  ? '/appointment'
+                  : page === 'Home'
+                  ? '/suphome'
+                  : page === 'Payments'
+                  ? '/spayments'
+                  : page === 'Price List'
+                  ? '/pricelevel'
+                  : page === 'Order Details'
+                  ? '/pendingoc'
+                  : `/${page.toLowerCase()}`
+              }
+              sx={{ my: 2, color: '#fff', display: 'block' }}
+              onClick={handleCloseNavMenu}
+            >
+              {page}
+            </Button>
+          ))}
+        </Box>
 
         <Box sx={{ flexGrow: 0 }}>
           <Tooltip title="Open settings">
@@ -117,10 +135,19 @@ function ResponsiveAppBar() {
               horizontal: 'right',
             }}
             open={Boolean(anchorElUser)}
-            onClose={handleCloseUserMenu}
+            onClose={() => setAnchorElUser(null)}
           >
             {settings.map((setting) => (
-              <MenuItem key={setting.label} onClick={() => handleCloseUserMenu(setting.route)}>
+              <MenuItem
+                key={setting.label}
+                onClick={() => {
+                  if (setting.label === 'Logout') {
+                    handleLogout(); // Call handleLogout on Logout
+                  } else {
+                    handleCloseUserMenu(setting.route);
+                  }
+                }}
+              >
                 <Typography textAlign="center">{setting.label}</Typography>
               </MenuItem>
             ))}
